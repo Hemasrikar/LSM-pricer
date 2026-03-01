@@ -14,3 +14,16 @@ public:
     double evaluate(double x) const;
     std::string name() const;
 };
+
+// Monomial Basis Function
+
+class MonomialBasis : public BasisFunction {
+public:
+    MonomialBasis(int power);
+
+    double evaluate(double x) const;
+    std::string name() const;
+
+private:
+    int power_;
+};
