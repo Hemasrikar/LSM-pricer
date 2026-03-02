@@ -27,3 +27,11 @@ public:
 private:
     int power_;
 };
+
+class LaguerrePolynomial : public BasisFunction {
+public:
+    LaguerrePolynomial(int order);
+
+    double evaluate(double x) const;
+    std::string name() const;
+};
