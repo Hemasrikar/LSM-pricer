@@ -1,5 +1,6 @@
 #include "basis_functions.hpp"
 #include <cmath>
+#include <vector>
 
 namespace lms {
 
@@ -11,7 +12,7 @@ public:
     }
 
     std::string name() const {
-        return "Const";
+        return "Constant";
     }
 };
 
@@ -20,7 +21,7 @@ class MonomialBasis : public BasisFunction {
 public:
     MonomialBasis(int power) {
         if (power < 0) {
-            throw std::invalid_argument("power must be >= 0");
+            throw std::invalid_argument("power must be greater than 0");
         }
         power_ = power;
     }
@@ -67,6 +68,28 @@ public:
 
 private:
     int order_;
+};
+
+// BasisSet holds a list of basis functions and provides two ways to fill it
+// use makeMonomialSet() for polynomial basis functions (1, x, x^2, x^3 and so on)
+// use makeLaguerreSet() for Laguerre polynomial basis functions
+class BasisSet {
+public:
+    std::vector<BasisFunction*> basis;
+
+    void makeLaguerreSet(int numTerms) {
+        basis.push_back(new ConstantBasis());
+        for (int i = 0; i < numTerms; i++) {
+            basis.push_back(new LaguerrePolynomial(i));
+        }
+    }
+
+    void makeMonomialSet(int numTerms) {
+        basis.push_back(new ConstantBasis());
+        for (int i = 1; i <= numTerms; i++) {
+            basis.push_back(new MonomialBasis(i));
+        }
+    }
 };
 
 }
