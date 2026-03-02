@@ -1,6 +1,6 @@
 #pragma once
 
-// Put Functions
+// Put Functions and ITM Functions
 class Put_payoff
 {
 private:
@@ -9,9 +9,10 @@ private:
 public:
     Put_payoff(double strike);
     double payoff(double S) const;
+    bool InTheMoney_Put(double S) const;
 };
 
-// Call Functions
+// Call Functions and ITM Functions
 class Call_payoff
 {
 private:
@@ -20,8 +21,7 @@ private:
 public:
     Call_payoff(double strike);
     double payoff(double S) const;
+    bool InTheMoney_Call(double S) const;
 };
 
-// In-The-Money Functions
-bool InTheMoney_Put(double S, double K);
-bool InTheMoney_Call(double S, double K);
+
