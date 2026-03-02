@@ -28,10 +28,22 @@ private:
     int power_;
 };
 
+// Laguerre Polynomial Function
+
 class LaguerrePolynomial : public BasisFunction {
 public:
     LaguerrePolynomial(int order);
 
     double evaluate(double x) const;
     std::string name() const;
+private:
+    int order_;
+};
+
+//Basis Set helper function
+
+class BasisSet {
+public:
+    void makeLaguerreSet(int numTerms);
+    void makeMonomialSet(int numTerms);
 };
