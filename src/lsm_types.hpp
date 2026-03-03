@@ -1,4 +1,4 @@
-
+# include <string>
 
 //  BasisFunction  
 // — Abstract: strategy for regression basis
