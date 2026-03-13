@@ -5,7 +5,7 @@
 namespace lms {
 
 // ConstantBasis
-double ConstantBasis::evaluate(double x) const {
+double ConstantBasis::evaluate(double /*x*/) const {
     return 1.0;
 }
 
