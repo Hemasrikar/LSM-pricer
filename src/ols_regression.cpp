@@ -1,4 +1,3 @@
-#pragma once
 #include <functional>
 #include <cmath>
 #include <vector>
@@ -31,7 +30,7 @@ Eigen::MatrixXd buildDesignMatrix(
     for (bool b : itm) if (b) ++n_itm;
     Eigen::MatrixXd X(n_itm, K); // https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html#:~:text=this%20page.-,Resizing
     int row = 0;
-    for (int i = 0; i < S_t.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(S_t.size()); ++i) {
         if (!itm[i]) continue;
         for (int k = 0; k < K; ++k)
             X(row, k) = basis.basis[k]->evaluate(S_t[i]);
