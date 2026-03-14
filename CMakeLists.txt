@@ -28,3 +28,6 @@ add_executable(my_program ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
 enable_testing()
 add_subdirectory(tests)
+
+find_package(Eigen3 REQUIRED)
+target_link_libraries(your_target PRIVATE Eigen3::Eigen)
