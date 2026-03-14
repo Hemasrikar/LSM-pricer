@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cstddef>
+#include <random>
 
 
 /*-------------------------------------------------------------------------------------------------
@@ -15,10 +16,14 @@
 * Samples are assumed to be independent
 ---------------------------------------------------------------------------------------------------*/
 struct RNG {
+    std::mt19937_64                        engine{std::random_device{}()};
+    std::normal_distribution<double>       norm_dist{0.0, 1.0};
+    std::uniform_real_distribution<double> uniform_dist{0.0, 1.0};
 
-    double normal(); //GENERATES FROM N(0,1)
-    double uniform01(); //GENERATES NOS FROM U(O,1)
+    double normal();    //GENERATES FROM N(0,1)
+    double uniform01(); //GENERATES FROM U(0,1)
 };
+
 /*-------------------------------------------------------------------------------------------------
 * BASE CASE FOR STOCHASTIC PROCESSES
 *
