@@ -39,6 +39,32 @@ Eigen::MatrixXd buildDesignMatrix(
     return X;
 }
 
+std::vector<bool> getITMVector(
+    std::vector<double> S_t,
+    OptionPayoff* payoff_function
+)
+{
+    std::vector<bool> itm(S_t.size());
+    for (size_t i = 0; i < S_t.size(); ++i) {
+        itm[i] = payoff_function->InTheMoney(S_t[i]); // Use the OptionPayoff's InTheMoney method to determine ITM status
+    }
+    return itm;
+};
+
+std::vector<double> buildYVector(
+    std::vector<double> cashflows, // Cashflows from t+1 (assume to bealready updated by previous backward step)
+    std::vector<bool> itm,         // Boolean to know if it's in the money.
+    double discount_factor         // exp(-r * dt)
+)
+{
+    std::vector<double> y;
+    for (int i = 0; i < static_cast<int>(itm.size()); ++i) {
+        if (itm[i]) {
+            y.push_back(cashflows[i] * discount_factor);
+        }
+    }
+    return y;
+};
 
 
 // std::vector<double> Ols_regression(
