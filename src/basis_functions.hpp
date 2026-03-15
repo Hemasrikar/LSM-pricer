@@ -4,51 +4,54 @@
 #include <cmath>
 #include <string>
 #include <stdexcept>
+#include <memory>
 #include <vector>
 
-namespace lms {
+namespace lsm{
+    namespace core{
 
-// ConstantBasis
-// intercept term, evaluates to 1.0 for any given value
-class ConstantBasis : public BasisFunction {
-public:
-    double evaluate(double x) const;
-    std::string name() const;
-};
+        // ConstantBasis
+        // intercept term, evaluates to 1.0 for any given value
+        class ConstantBasis : public BasisFunction {
+        public:
+            double evaluate(double x) const override;
+            std::string name() const override;
+        };
 
-// MonomialBasis
-class MonomialBasis : public BasisFunction {
-public:
-    MonomialBasis(int power);
+        // MonomialBasis
+        class MonomialBasis : public BasisFunction{
+        public:
+            explicit MonomialBasis(int power);
+            double evaluate(double x) const override;
+            std::string name() const override;
+        private:
+            int power_;
+        };
 
-    double evaluate(double x) const;
-    std::string name() const;
+        // LaguerrePolynomial
+        class LaguerrePolynomial : public BasisFunction{
+        public:
+            explicit LaguerrePolynomial(int order);
+            double evaluate(double x) const override;
+            std::string name() const override;
+        private:
+            int order_;
+        };
 
-private:
-    int power_;
-};
+        // BasisSet holds a list of basis functions and provides two ways to fill it.
+        // use makeMonomialSet() for polynomial basis functions (1, x, x^2, x^3 and so on)
+        // use makeLaguerreSet() for Laguerre polynomial basis functions
+        // Owns its basis functions via unique_ptr.
+        class BasisSet{
+        public:
+            std::vector<std::unique_ptr<BasisFunction>> basis;
 
-// LaguerrePolynomial
-class LaguerrePolynomial : public BasisFunction {
-public:
-    LaguerrePolynomial(int order);
+            // Returns plain (non-owning) pointers for use by OLSRegressor
+            std::vector<BasisFunction*> basisPtrs() const;
 
-    double evaluate(double x) const;
-    std::string name() const;
+            void makeLaguerreSet(int numTerms);
+            void makeMonomialSet(int numTerms);
+        };
 
-private:
-    int order_;
-};
-
-// BasisSet holds a list of basis functions and provides two ways to fill it
-// use makeMonomialSet() for polynomial basis functions (1, x, x^2, x^3 and so on)
-// use makeLaguerreSet() for Laguerre polynomial basis functions
-class BasisSet {
-public:
-    std::vector<BasisFunction*> basis;
-
-    void makeLaguerreSet(int numTerms);
-    void makeMonomialSet(int numTerms);
-};
-
-} // namespace lms
+    } // namespace core
+} // namespace lsm
