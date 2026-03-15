@@ -11,15 +11,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-Wall -Wextra)
 
 # Add more source files here if needed
-set(SRC_FILES 
-    ${CMAKE_SOURCE_DIR}/src/basis_functions.cpp 
+set(SRC_FILES
+    ${CMAKE_SOURCE_DIR}/src/basis_functions.cpp
     ${CMAKE_SOURCE_DIR}/src/convergence_analyser.cpp
     ${CMAKE_SOURCE_DIR}/src/lsm_pricer.cpp
     ${CMAKE_SOURCE_DIR}/src/lsm_types.cpp
+    ${CMAKE_SOURCE_DIR}/src/mc_paths.cpp
     ${CMAKE_SOURCE_DIR}/src/ols_regression.cpp
     ${CMAKE_SOURCE_DIR}/src/option_payoff.cpp
     ${CMAKE_SOURCE_DIR}/src/underlying_sde.cpp
-    
+
 )
 
 add_executable(my_program ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)

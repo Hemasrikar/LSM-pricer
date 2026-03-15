@@ -7,6 +7,7 @@
 #include "mc_paths.hpp"
 #include "option_payoff.hpp"
 #include "basis_functions.hpp"
+#include "underlying_sde.hpp"
 
 
 // https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html#:~:text=typedef%20Matrix%3Cdouble%2C%20Dynamic%2C%20Dynamic%3E%20MatrixXd%3B
@@ -52,7 +53,7 @@ std::vector<bool> getITMVector(
 };
 
 std::vector<double> buildYVector(
-    std::vector<double> cashflows, // Cashflows from t+1 (assume to bealready updated by previous backward step)
+    std::vector<double> cashflows, // Cashflows from t+1 (assume to be already updated by previous backward step)
     std::vector<bool> itm,         // Boolean to know if it's in the money.
     double discount_factor         // exp(-r * dt)
 )
@@ -67,31 +68,40 @@ std::vector<double> buildYVector(
 };
 
 
-// std::vector<double> Ols_regression(
-//     stochastic_process process, 
-//     double simulation_number, 
-//     mc_sampling sampler
-//     int number_of_intervals, 
-//     basis_function basis,
-//     double interval_length,
-// )
-// { 
-//     // compute length_of_output(basis)
-//     std::vector<Eigen::MatrixXd> OLS_regressors_across_time(number_of_intervals, Eigen::MatrixXd(simulation_number, length_of_output(basis))); // (???) Is that how you size a vector of Eigen matrices???
-//     std::vector<Eigen::MatrixXd> 
-//     // Need to derive OLS regressors here noting that the design matrix will be made for each time. Since the basis function gives all Beta params
-//     // Need to assign 
-//     datapoints.resize(number_of_intervals, length_of_output(basis)); //https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html#:~:text=this%20page.-,Resizing,-The%20current%20size
-//     std::vector<double> sampled_path;
-//     for( i = 0; i < simulation_number; i++){
-//         sampled_path = sampler(number_of_intervals, interval_length, process);
-//         for(j = 0; j < interval_number; j++) {
 
-//            datapoints(i, j) = basis(sampled_path[j]);
+std::vector<double> Ols_regression(
+    std::vector<std::vector<double>>& paths,
+    std::size_t t,
+    std::vector<double>& cashflows,
+    std::vector<bool>& itm,
+    double discount_factor,
+    lms::BasisSet basis)
+{
+    std::size_t N = paths.size();
+    int K = basis.basis.size();
 
-//         }
-//     }
-// }
+    // Extract stock prices at time t across all paths
+    std::vector<double> S_t(N);
+    for (std::size_t i = 0; i < N; ++i)
+        S_t[i] = paths[i][t];
 
+    // Build design matrix X (ITM paths only) and discounted Y vector
+    Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis);
+    std::vector<double> Y_vec = buildYVector(cashflows, itm, discount_factor);
+    Eigen::VectorXd Y = Eigen::Map<Eigen::VectorXd>(Y_vec.data(), static_cast<int>(Y_vec.size()));
+
+    // https://libeigen.gitlab.io/eigen/docs-3.3/group__LeastSquares.html#:~:text=and%20decompositions%20.-,Using%20the%20QR%20decomposition,-The%20solve()%20method
+    Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);  // Solve OLS via QR decomposition: beta = (X'X)^{-1} X'Y
+
+    
+    std::vector<double> C_hat(N, 0.0); // Predict continuation values for all paths; OTM paths get 0.0
+    for (std::size_t i = 0; i < N; ++i) {
+        if (!itm[i]) continue;
+        double val = 0.0;
+        for (int k = 0; k < K; ++k)
+            val += beta(k) * basis.basis[k]->evaluate(S_t[i]);
+        C_hat[i] = val;
+    }
+    return C_hat;
+}
 // Potential discussion on code performance: https://scicomp.stackexchange.com/questions/3159/is-it-a-good-idea-to-use-vectorvectordouble-to-form-a-matrix-class-for-high
-// 
