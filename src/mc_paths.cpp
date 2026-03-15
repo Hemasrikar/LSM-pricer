@@ -1,5 +1,8 @@
 #include "mc_paths.hpp"
 
+namespace lsm {
+    namespace engine {
+
 /*-------------------------------------------------------------------------------------------------
  * GENERATE A MATRIX OF SIMULATED PATHS
  *
@@ -18,16 +21,19 @@
  *
 ---------------------------------------------------------------------------------------------------*/
 std::vector<std::vector<double>> generatePaths(
-    const StochasticProcess& process,
+    const lsm::core::StochasticProcess& process,
     double s0,
     double T,
     std::size_t n,
     std::size_t N,
-    RNG& rng)
+    lsm::core::RNG& rng)
 {
     std::vector<std::vector<double>> paths(N);
     for (std::size_t i = 0; i < N; ++i) {
         paths[i] = process.simulatePath(s0, T, n, rng);
     }
     return paths;
+}
+
+    }
 }
