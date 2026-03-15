@@ -31,4 +31,3 @@ target_link_libraries(my_program Eigen3::Eigen)
 
 enable_testing()
 add_subdirectory(tests)
-https://stackoverflow.com/questions/12249140/find-package-eigen3-for-cmake#:~:text=find_package%20(Eigen3%203.3,preferred%20whenever%20available.
