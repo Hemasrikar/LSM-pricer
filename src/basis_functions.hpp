@@ -1,6 +1,5 @@
 #pragma once
-
-#include "lsm_types.hpp"
+#include "lsm_pricer.hpp"
 #include <cmath>
 #include <string>
 #include <stdexcept>

@@ -5,6 +5,7 @@
 // For finding header files necessary used: https://libeigen.gitlab.io/eigen/docs-nightly/group__QuickRefPage.html
 #include <Eigen/Dense>
 #include "mc_paths.hpp"
+#include "lsm_pricer.hpp"
 #include "option_payoff.hpp"
 #include "basis_functions.hpp"
 #include "underlying_sde.hpp"
@@ -24,7 +25,7 @@ std::vector<double> ols_parameters;
 Eigen::MatrixXd buildDesignMatrix(
     std::vector<double> S_t,
     std::vector<bool> itm, // Boolean to know if it's in the money.
-    lms::BasisSet basis)
+    lsm::core::BasisSet& basis)
 {
     int K = basis.basis.size();
     int n_itm = 0;
@@ -75,7 +76,7 @@ std::vector<double> Ols_regression(
     std::vector<double>& cashflows,
     std::vector<bool>& itm,
     double discount_factor,
-    lms::BasisSet basis)
+    lsm::core::BasisSet& basis)
 {
     std::size_t N = paths.size();
     int K = basis.basis.size();

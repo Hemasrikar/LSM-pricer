@@ -12,7 +12,7 @@
 Eigen::MatrixXd buildDesignMatrix(
     std::vector<double> S_t,
     std::vector<bool> itm,
-    lms::BasisSet basis);
+    lsm::core::BasisSet& basis);
 
 std::vector<bool> getITMVector(
     std::vector<double> S_t,
@@ -29,4 +29,4 @@ std::vector<double> Ols_regression(
     std::vector<double>& cashflows,
     std::vector<bool>& itm,
     double discount_factor,
-    lms::BasisSet basis);
+    lsm::core::BasisSet& basis);

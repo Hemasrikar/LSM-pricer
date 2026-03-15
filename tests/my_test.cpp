@@ -20,7 +20,7 @@ TEST_CASE("OLS: DesignMatrixTest with Monomial Basis", "ols")
 {
 std::vector<double> S_t = {100, 110, 90, 95, 105};
 std::vector<bool> itm = {false, true, true, true, false};
-lms::BasisSet basis;
+lsm::core::BasisSet basis;
 basis.makeMonomialSet(3);
 
 Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis);
@@ -36,7 +36,7 @@ TEST_CASE("OLS: DesignMatrixTest with Laguerre Polynomials", "ols1")
 {
 std::vector<double> S_t = {100, 110, 90, 95, 105};
 std::vector<bool> itm = {false, true, true, true, false};
-lms::BasisSet basis;
+lsm::core::BasisSet basis;
 basis.makeLaguerreSet(3);
 
 Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis);
@@ -102,7 +102,7 @@ std::vector<double> S_t2 = {1.08, 1.26, 1.07, 0.97, 1.56, 0.77, 0.84, 1.22};
 std::vector<bool> itm = getITMVector(S_t2, &put);
 
 // Basis {1, X, X^2} i.e. monomial degree 2 gives 3 functions (paper uses constant + X + X^2)
-lms::BasisSet basis;
+lsm::core::BasisSet basis;
 basis.makeMonomialSet(2);
 
 std::vector<double> C_hat = Ols_regression(paths, 2, cashflows, itm, discount_factor, basis);
