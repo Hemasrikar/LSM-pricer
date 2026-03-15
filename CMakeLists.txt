@@ -31,3 +31,4 @@ enable_testing()
 add_subdirectory(tests)
 
 find_package(Eigen3 REQUIRED)
+target_include_directories(my_program PRIVATE ${EIGEN3_INCLUDE_DIR})
