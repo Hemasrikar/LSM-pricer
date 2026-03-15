@@ -8,7 +8,7 @@ The core idea is to use regression on Monte Carlo simulated paths to estimate th
 
 ### Configuration: LSMConfig
 
-The `LSMConfig` struct controls all parameters for the Longstaff-Schwartz pricer. The lsm_type.hpp provides defaults and values can be changed through main.cpp.
+The `LSMConfig` struct controls all parameters for the Longstaff-Schwartz pricer. The lsm_pricer.hpp provides defaults and values can be changed through main.cpp.
 
 **Default Configuration**
 ```cpp
