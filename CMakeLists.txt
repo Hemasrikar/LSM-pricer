@@ -10,8 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_compile_options(-Wall -Wextra)
 
-find_package(Eigen3 REQUIRED)
-
 # Add more source files here if needed
 set(SRC_FILES
     ${CMAKE_SOURCE_DIR}/src/basis_functions.cpp
@@ -25,7 +23,7 @@ set(SRC_FILES
 )
 
 add_executable(my_program ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)
-target_link_libraries(my_program Eigen3::Eigen)
+target_include_directories(my_program PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
 
 ####################### TESTING STUFF STARTS HERE ###########################################################
 
