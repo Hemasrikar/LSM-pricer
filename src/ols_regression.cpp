@@ -10,16 +10,16 @@
 #include "basis_functions.hpp"
 #include "underlying_sde.hpp"
 
+namespace lsm {
+    namespace engine {
 
 // https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html#:~:text=typedef%20Matrix%3Cdouble%2C%20Dynamic%2C%20Dynamic%3E%20MatrixXd%3B
 Eigen::MatrixXd datapoints;
 
 // https://stackoverflow.com/questions/40852757/c-how-to-convert-stdvector-to-eigenmatrixxd
 
-
 // OLS regressors
 std::vector<double> ols_parameters;
-
 
 
 Eigen::MatrixXd buildDesignMatrix(
@@ -43,7 +43,7 @@ Eigen::MatrixXd buildDesignMatrix(
 
 std::vector<bool> getITMVector(
     std::vector<double> S_t,
-    OptionPayoff* payoff_function
+    lsm::core::OptionPayoff* payoff_function
 )
 {
     std::vector<bool> itm(S_t.size());
@@ -67,7 +67,6 @@ std::vector<double> buildYVector(
     }
     return y;
 };
-
 
 
 std::vector<double> Ols_regression(
@@ -94,7 +93,6 @@ std::vector<double> Ols_regression(
     // https://libeigen.gitlab.io/eigen/docs-3.3/group__LeastSquares.html#:~:text=and%20decompositions%20.-,Using%20the%20QR%20decomposition,-The%20solve()%20method
     Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);  // Solve OLS via QR decomposition: beta = (X'X)^{-1} X'Y
 
-    
     std::vector<double> C_hat(N, 0.0); // Predict continuation values for all paths; OTM paths get 0.0
     for (std::size_t i = 0; i < N; ++i) {
         if (!itm[i]) continue;
@@ -106,3 +104,6 @@ std::vector<double> Ols_regression(
     return C_hat;
 }
 // Potential discussion on code performance: https://scicomp.stackexchange.com/questions/3159/is-it-a-good-idea-to-use-vectorvectordouble-to-form-a-matrix-class-for-high
+
+    }
+}

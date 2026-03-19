@@ -1,3 +1,5 @@
+#pragma once
+
 #include <functional>
 #include <cmath>
 #include <vector>
@@ -8,6 +10,8 @@
 #include "option_payoff.hpp"
 #include "basis_functions.hpp"
 
+namespace lsm {
+    namespace engine {
 
 Eigen::MatrixXd buildDesignMatrix(
     std::vector<double> S_t,
@@ -16,7 +20,7 @@ Eigen::MatrixXd buildDesignMatrix(
 
 std::vector<bool> getITMVector(
     std::vector<double> S_t,
-    OptionPayoff* payoff_function);
+    lsm::core::OptionPayoff* payoff_function);
 
 std::vector<double> buildYVector(
     std::vector<double> cashflows,
@@ -30,3 +34,6 @@ std::vector<double> Ols_regression(
     std::vector<bool>& itm,
     double discount_factor,
     lsm::core::BasisSet& basis);
+
+    }
+}

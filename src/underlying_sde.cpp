@@ -1,8 +1,11 @@
 #include "underlying_sde.hpp"
-#include <stdexcept> 
+#include <stdexcept>
 #include <cmath>
 #include <algorithm>
 #include <random>
+
+namespace lsm {
+    namespace core {
 
 double RNG::normal() {
     return norm_dist(engine);
@@ -165,4 +168,7 @@ double JumpDiffusionProcess::step(double s, double dt, RNG& rng) const {
     const double diff  = sigma_ * std::sqrt(dt) * z;
 
     return s * std::exp(drift + diff);
+}
+
+    }
 }

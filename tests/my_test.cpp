@@ -5,6 +5,9 @@
 #include "mc_paths.hpp"
 #include "option_payoff.hpp"
 
+using namespace lsm::core;
+using namespace lsm::engine;
+
 TEST_CASE("0 == 0", "[tests]")
 {
 	REQUIRE(0 == 0);

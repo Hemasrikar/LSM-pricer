@@ -1,10 +1,13 @@
 #pragma once
 
+namespace lsm {
+    namespace core {
+
 // Base class
-class OptionPayoff 
+class OptionPayoff
 {
 protected:
-    double K;  
+    double K;
 
 public:
     OptionPayoff(double strike);
@@ -16,7 +19,7 @@ public:
 
 
 // Put function and ITM
-class Put_payoff : public OptionPayoff 
+class Put_payoff : public OptionPayoff
 {
 public:
     Put_payoff(double strike);
@@ -27,7 +30,7 @@ public:
 
 
 //Call function and ITM
-class Call_payoff : public OptionPayoff 
+class Call_payoff : public OptionPayoff
 {
 public:
     Call_payoff(double strike);
@@ -36,3 +39,5 @@ public:
     bool InTheMoney(double S) const;
 };
 
+    }
+}
