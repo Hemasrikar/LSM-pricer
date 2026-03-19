@@ -12,8 +12,8 @@ namespace bs_pricer {
 		return 0.5 * erfc(-x * M_SQRT1_2);
 	}
 
-	OptionPricer price_vanilla_option_european_bs(double S0, double r, double sigma,
-												double K, double T) {
+	double price_vanilla_option_european_bs(double S0, double r, double sigma,
+												double K, double T, bool call) {
 		
 		double d1 = (log(S0 / K) + (r+0.5*pow(sigma,2))*T) / (sigma * sqrt(T));
 		double d2 = d1 - sigma*sqrt(T);
@@ -24,8 +24,12 @@ namespace bs_pricer {
 		double C = S0*n_d1 - K*exp(-r*T)*n_d2;
 		double P = K*exp(-r*T)*(1-n_d2) - S0*(1-n_d1);
 
-		return {C, P};
+		if (call == true){
+			return C;
+		}
 
-	}
+		return P;
 
-} //namespace bs_pricer
+		}
+
+	} //namespace bs_pricer

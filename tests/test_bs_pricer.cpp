@@ -11,11 +11,13 @@ TEST_CASE("Black-Scholes: Option Pricing", "[black_scholes]")
     double r = 0.05;
     double sigma = 0.2;
 
-    auto [call, put] = bs_pricer::price_vanilla_option_european_bs(S, r, sigma, K, T);
+    double call_price = bs_pricer::price_vanilla_option_european_bs(S, r, sigma, K, T, true);
+    double put_price = bs_pricer::price_vanilla_option_european_bs(S, r, sigma, K, T, false);
 
-    REQUIRE(call == Approx(10.4506).epsilon(0.0001));
 
-    REQUIRE(put == Approx(5.5735).epsilon(0.0001));
+    REQUIRE(call_price == Approx(10.4506).epsilon(0.0001));
+
+    REQUIRE(put_price == Approx(5.5735).epsilon(0.0001));
 }
 
 
