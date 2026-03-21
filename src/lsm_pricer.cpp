@@ -17,6 +17,9 @@ namespace engine{
     //num of exercise dates
     double dt = config.maturity / numTimes;
 
+    //one-step discount factor
+    double discountFactor = std::exp(-config.riskFreeRate * dt);
+
     //stores payoff for each path
     std::vector<double> cashflow(numPaths);
 
@@ -28,74 +31,68 @@ namespace engine{
     // just the terminal payoff
 
     for (int i = 0; i < numPaths; i++){
-        cashflow[i] = (*payoff)(data.paths[i][numTimes]);
+        cashflow[i] = payoff->payoff(data.paths[i][numTimes]);
         exerciseTime[i] = numTimes;
         data.cashFlows[i][numTimes] = cashflow[i];
     }
 
     //implementing backward induction by moving backwards in time
     for (int t = numTimes - 1; t >= 1; t--){
-        // X will store current stock prices for in-the-money paths
-        std::vector<double> X;
-        // Y will store discounted future cashflows for those same paths
-        std::vector<double> Y;
-        // pathIndex remembers which original path each row belongs to
-        std::vector<int> pathIndex;
 
-        for (int i = 0; i < numPaths; i++) {
-            // Value if we exercise immediately at time t
-            double exerciseValue = (*payoff)(data.paths[i][t]);
-            //We are only using paths that are in the money for regression
+        //Mark which paths are in the monye at time t
+        std::vector<bool> itm(numPaths, false);
+
+        for (int i = 0; i < numPaths; ++i){
+            double exerciseValue = payoff->payoff(data.paths[i][t]);
             if (exerciseValue > 0.0) {
-                // Discount the currently stored future cashflow back to time t
-                double discountedFutureCashflow =
-                    cashflow[i] * std::exp(-config.riskFreeRate * dt * (exerciseTime[i] - t));
-                // Current stock price goes into X
-                X.push_back(data.paths[i][t]);
-                // Discounted future payoff goes into Y
-                Y.push_back(discountedFutureCashflow);
-                // Remember which path this came from
-                pathIndex.push_back(i);
+                itm[i] = true;
             }
         }
-        // Need at least as many data points as basis functions
-        if (X.size() >= basis ->basis.size()) {
-            // Fit continuation value as a function of current stock price
-            std::vector<double> coeffs = regressor.fit(X, Y);
-            //compare exercise and continuation
-            for (int k = 0; k < static_cast<int>(pathIndex.size()); k++) {
-                int i = pathIndex[k];
 
-                double exerciseValue = (*payoff)(data.paths[i][t]);
-                 // Estimated continuation value from the regression
-                double continuationValue = regressor.predict(data.paths[i][t], coeffs);
+        //Run Regression to estimate continuation coeffs
+        std::vector<double> coeffs = lsm::engine::Ols_regression(
+                data.paths, 
+                static_cast<std::size_t>(t),
+                cashflow, 
+                itm, 
+                discountFactor, 
+                *basis
+            );
+        
+        //compare execise value with continuation value
+        for (int i = 0; i < numPaths; ++i){
+            if(!itm[i]){
+                continue;
+            }
+            double St = data.paths[i][t];
+            double exerciseValue = payoff->payoff(St);
 
-                if (exerciseValue > continuationValue) {
-                    // Replace the old future payoff with payoff from exercising now
-                    cashflow[i] = exerciseValue;
+            //continuation value = fitted regression at S_t
+            if (coeffs.size() > basis->basis.size()){
+                throw std::runtime_error("Regression returned more coefficients than available basis functions");
+            }
+            double continuationValue = 0.0;
+            for (std::size_t j = 0; j < coeffs.size(); ++j){
+                continuationValue += coeffs[j] * basis->basis[j]->evaluate(St);
+            }
+            if (exerciseValue > continuationValue){
+                cashflow[i] = exerciseValue;
+                exerciseTime[i] = t;
+                data.cashFlows[i][t] = exerciseValue;
 
-                    // Record that exercise now happens at time t
-                    exerciseTime[i] = t;
-                    // Store the exercise payoff in the cash-flow matrix
-                    data.cashFlows[i][t] = exerciseValue;
-                    // Remove any later cashflows because the option is dead after exercise
-                    for (int s = t + 1; s <= numTimes; s++) {
-                        data.cashFlows[i][s] = 0.0;
-                    }
+                for(int s= t+1; s<= numTimes; ++s){
+                    data.cashFlows[i][s] = 0.0;
                 }
             }
         }
+        }  
+        std::vector<double> presentValue(numPaths, 0.0);
+        
+        for(int i = 0; i < numPaths; ++i){
+            presentValue[i] = cashflow[i] * std::exp(-config.riskFreeRate*dt*exerciseTime[i]);
+        }
+        return presentValue;
     }
-   //discount all chosen cashflows back to time 0
-    std::vector<double> presentValue(numPaths);
-
-    for (int i = 0; i < numPaths; i++) {
-    presentValue[i] = cashflow[i] * std::exp(-config.riskFreeRate * dt * exerciseTime[i]);
-    }   
-
-    //return present value of path
-    return presentValue;
-}
 
     SimulationResult LSMPricer::computeOptionValue(
         const std::vector<double>& pv, 
