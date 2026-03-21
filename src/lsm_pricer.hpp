@@ -69,7 +69,6 @@ namespace lsm{
             lsm::core::BasisSet* basis;
 
             lsm::engine::LSMConfig config;
-            lsm::engine::Ols_regression regressor;
 
             lsm::engine::PathData simulatePaths(double S0) const;
 
@@ -80,7 +79,7 @@ namespace lsm{
                 double europeanValue,
                 int N, 
                 int T) const;
-        }
+        };
 
     } // namespace engine
 } // namespace lsm
