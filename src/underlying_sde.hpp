@@ -23,10 +23,12 @@ struct RNG {
 class StochasticProcess {
     public:
         virtual ~StochasticProcess() = default;
+        //Advance by one step given an explicit N(0,1)
+        virtual double stepWithNormal(double s, double dt, double z, RNG& rng) const = 0;
         // Advance the process by one time step.
         virtual double step(double s, double dt, RNG& rng) const = 0;
 
-         // Simulate a path of length n over [0, T], starting from S0.
+         // Simulate a path of length n+1 over [0, T], starting from S0.
         std::vector<double> simulatePath(double S0, double T, std::size_t n, RNG& rng) const;
 };
 
@@ -36,7 +38,8 @@ class GeometricBrownianMotion final : public StochasticProcess {
 public:
     GeometricBrownianMotion(double r, double sigma);
 
-    double step(double s, double dt, RNG& rng) const override;
+    // Exact solution: S_{t+dt} = S_t exp((r - sigma^2/2)dt + sigma sqrt(dt) z)
+    double stepWithNormal(double s, double dt, double z, RNG& rng) const override;
 
     double r() const { return r_; }
 
@@ -53,6 +56,10 @@ class JumpDiffusionProcess final : public StochasticProcess {
 public:
     JumpDiffusionProcess(double r, double sigma, double lambda);
 
+    //antithetic step: z drives diffusion; jump detection uses the rng
+    double stepWithNormal(double s, double dt, double z, RNG& rng) const override;
+    
+    //full step: draws z for diffusion and u for jump
     double step(double s, double dt, RNG& rng) const override;
 
     // Drift parameter
