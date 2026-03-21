@@ -2,8 +2,12 @@
 
 
 #include <string>
-
 #include <vector>
+#include "underlying_sde.hpp"
+#include "option_payoff.hpp"
+#include "basis_functions.hpp"
+#include "ols_regression.hpp"
+
 
 //  BasisFunction  
 // — Abstract: strategy for regression basis
@@ -50,6 +54,33 @@ namespace lsm{
         int    numPaths             = 0;
         int    numExerciseDates     = 0;
         };
+
+        class LSMPricer{
+        public:
+            LSMPricer(lsm::core::StochasticProcess* process,
+              lsm::core::OptionPayoff* payoff,
+              lsm::core::BasisSet* basis,
+              const lsm::engine::LSMConfig& config);
+            
+              lsm::engine::SimulationResult price(double S0);
+        private:
+            lsm::core::StochasticProcess* process;
+            lsm::core::OptionPayoff* payoff;
+            lsm::core::BasisSet* basis;
+
+            lsm::engine::LSMConfig config;
+            lsm::engine::Ols_regression regressor;
+
+            lsm::engine::PathData simulatePaths(double S0) const;
+
+            std::vector<double> backwardInduction(lsm::engine::PathData& data) const;
+
+            lsm::engine::SimulationResult computeOptionValue(
+                const std::vector<double>& pv,
+                double europeanValue,
+                int N, 
+                int T) const;
+        }
 
     } // namespace engine
 } // namespace lsm
