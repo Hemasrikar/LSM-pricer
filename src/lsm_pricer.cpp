@@ -4,8 +4,10 @@
 #include <stdexcept>
 #include <vector>
 
-std::vector<double> LSMPricer::backwardInduction(PathData& data) const
-{
+namespace lsm{
+namespace engine{
+    std::vector<double> LSMPricer::backwardInduction(PathData& data) const
+    {
     //num of simulated paths
     int numPaths = data.numPaths;
     
@@ -95,36 +97,39 @@ std::vector<double> LSMPricer::backwardInduction(PathData& data) const
     return presentValue;
 }
 
-SimulationResult LSMPricer::computeOptionValue(
-    const std::vector<double>& pv, 
-    double europeanValue,
-    int N, 
-    int T) const
-{
-    double sum = 0.0; //will store sum of all pathwise present vals
+    SimulationResult LSMPricer::computeOptionValue(
+        const std::vector<double>& pv, 
+        double europeanValue,
+        int N, 
+        int T) const
+    {
+        double sum = 0.0; //will store sum of all pathwise present vals
 
-    double sumSq = 0.0; //will store the sum of squares of all pathwise vals
+        double sumSq = 0.0; //will store the sum of squares of all pathwise vals
 
-    for (int i = 0; i < N; i++){
-        sum += pv[i];
-        sumSq += pv[i] * pv[i];
+        for (int i = 0; i < N; i++){
+            sum += pv[i];
+            sumSq += pv[i] * pv[i];
+        }
+
+        double optionValue = sum/N; //monte carlo estimate of the option val
+
+        double variance = std::max(0.0, sumSq/N - optionValue * optionValue);
+
+        double standardError = std::sqrt(variance / N); //standard error
+
+        //store everything in the result obj
+        SimulationResult result;
+        result.optionValue = optionValue;
+        result.standardError = standardError;
+        result.europeanValue = europeanValue;
+        result.earlyExercisePremium = optionValue - europeanValue;
+        result.numPaths = N;
+        result.numExerciseDates = T;
+
+        return result;
+
     }
-
-    double optionValue = sum/N; //monte carlo estimate of the option val
-
-    double variance = std::max(0.0, sumSq/N - optionValue * optionValue);
-
-    double standardError = std::sqrt(variance / N); //standard error
-
-    //store everything in the result obj
-    SimulationResult result;
-    result.optionValue = optionValue;
-    result.standardError = standardError;
-    result.europeanValue = europeanValue;
-    result.earlyExercisePremium = optionValue - europeanValue;
-    result.numPaths = N;
-    result.numExerciseDates = T;
-
-    return result;
+}
 
 }
