@@ -1,0 +1,98 @@
+[
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o CMakeFiles/my_program.dir/src/basis_functions.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/basis_functions.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/basis_functions.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/CMakeFiles/my_program.dir/src/basis_functions.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o CMakeFiles/my_program.dir/src/convergence_analyser.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/convergence_analyser.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/convergence_analyser.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/CMakeFiles/my_program.dir/src/convergence_analyser.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o CMakeFiles/my_program.dir/src/lsm_pricer.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/lsm_pricer.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/lsm_pricer.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/CMakeFiles/my_program.dir/src/lsm_pricer.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o CMakeFiles/my_program.dir/src/mc_paths.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/mc_paths.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/mc_paths.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/CMakeFiles/my_program.dir/src/mc_paths.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o CMakeFiles/my_program.dir/src/ols_regression.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/ols_regression.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/ols_regression.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/CMakeFiles/my_program.dir/src/ols_regression.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o CMakeFiles/my_program.dir/src/option_payoff.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/option_payoff.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/option_payoff.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/CMakeFiles/my_program.dir/src/option_payoff.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o CMakeFiles/my_program.dir/src/underlying_sde.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/underlying_sde.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/underlying_sde.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/CMakeFiles/my_program.dir/src/underlying_sde.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o CMakeFiles/my_program.dir/src/main.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/main.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/main.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/CMakeFiles/my_program.dir/src/main.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/extern/catch2\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o tests/CMakeFiles/my_test.dir/__/src/basis_functions.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/basis_functions.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/basis_functions.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/CMakeFiles/my_test.dir/__/src/basis_functions.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/extern/catch2\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o tests/CMakeFiles/my_test.dir/__/src/convergence_analyser.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/convergence_analyser.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/convergence_analyser.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/CMakeFiles/my_test.dir/__/src/convergence_analyser.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/extern/catch2\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o tests/CMakeFiles/my_test.dir/__/src/lsm_pricer.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/lsm_pricer.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/lsm_pricer.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/CMakeFiles/my_test.dir/__/src/lsm_pricer.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/extern/catch2\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o tests/CMakeFiles/my_test.dir/__/src/mc_paths.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/mc_paths.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/mc_paths.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/CMakeFiles/my_test.dir/__/src/mc_paths.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/extern/catch2\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o tests/CMakeFiles/my_test.dir/__/src/ols_regression.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/ols_regression.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/ols_regression.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/CMakeFiles/my_test.dir/__/src/ols_regression.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/extern/catch2\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o tests/CMakeFiles/my_test.dir/__/src/option_payoff.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/option_payoff.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/option_payoff.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/CMakeFiles/my_test.dir/__/src/option_payoff.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/extern/catch2\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o tests/CMakeFiles/my_test.dir/__/src/underlying_sde.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/underlying_sde.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src/underlying_sde.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/CMakeFiles/my_test.dir/__/src/underlying_sde.cpp.o"
+},
+{
+  "directory": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build",
+  "command": "/usr/bin/clang++ -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/extern/catch2\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/src\" -I\"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/dependencies/eigen/5.0.1/include/eigen3\" -g -std=gnu++20 -arch arm64 -Wall -Wextra -o tests/CMakeFiles/my_test.dir/my_test.cpp.o -c \"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/tests/my_test.cpp\"",
+  "file": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/tests/my_test.cpp",
+  "output": "/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/CMakeFiles/my_test.dir/my_test.cpp.o"
+}
+]

@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/cmake_install.cmake",
+		"/Users/srikar/Documents/WBS/IB9JHO/Group Project/group-assignment-unicorn/build/tests/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
