@@ -8,6 +8,13 @@
 namespace lsm{
     namespace core{
 
+        class BasisFunction {
+        public:
+            virtual ~BasisFunction() = default;
+            virtual double evaluate(double x) const = 0;
+            virtual std::string name() const = 0;
+        };
+
         // ConstantBasis
         // intercept term, evaluates to 1.0 for any given value
         class ConstantBasis : public BasisFunction {
@@ -49,13 +56,6 @@ namespace lsm{
 
             void makeLaguerreSet(int numTerms);
             void makeMonomialSet(int numTerms);
-        };
-
-        class BasisFunction {
-        public:
-            virtual ~BasisFunction() = default;
-            virtual double evaluate(double x) const = 0;
-            virtual std::string name() const = 0;
         };
 
     } // namespace core
