@@ -1,7 +1,4 @@
 #pragma once
-
-#include <vector>
-
 #include <string>
 #include <vector>
 #include "underlying_sde.hpp"
@@ -10,26 +7,6 @@
 #include "ols_regression.hpp"
 
 namespace lsm {
-   /*  I dont think this is required... since we are including underlying SDE
-    // RNG part
-    class RNG {
-    public:
-        explicit RNG(unsigned int seed);
-
-        double normal();
-    };
-    
-    // Stochastic process 
-    class StochasticProcess {
-    public:
-        virtual ~StochasticProcess() = default;
-
-        virtual double step(double S, double dt, RNG& rng) const = 0;
-
-        virtual double stepWithNormal(double S, double dt, double z) const = 0;
-    };
-    */ 
-
     namespace engine {
 
         // Configuration for LSMPricer
