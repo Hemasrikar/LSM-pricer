@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 
 #include <string>
 #include <vector>
@@ -8,34 +9,53 @@
 #include "basis_functions.hpp"
 #include "ols_regression.hpp"
 
+namespace lsm 
 
-//  BasisFunction  
-// — Abstract: strategy for regression basis
+    // Configuration for LSM
+    struct LSMConfig {
+        int numPaths = 0;
+        int numExerciseDates = 0;
+        double maturity = 0.0;
+        bool useAntithetic = false;
+        unsigned int rngSeed = 42;
+    };
 
-namespace lsm{
-    namespace core{
+    // Path storage structure
+    struct PathData {
+        int numPaths = 0;
+        int numTimeSteps = 0;
 
-        // BasisFunction — Abstract strategy for regression basis
-        class BasisFunction {
-        public:
-            virtual ~BasisFunction() = default;
-            virtual double evaluate(double x) const = 0;
-            virtual std::string name() const = 0;
-        };
+        std::vector<std::vector<double>> paths;
 
-    } // namespace core
+        std::vector<std::vector<double>> cashFlows;
+    };
 
-    namespace engine{
+    // RNG part
+    class RNG {
+    public:
+        explicit RNG(unsigned int seed);
 
-        // Configuration for LSMPricer
-        struct LSMConfig {
-            int numPaths = 100000;  // total simulation paths
-            bool useAntithetic = true;  // Antithetic Variance reduction
-            int numExerciseDates = 50;  // Early exercise opportunities (t=1..T)
-            double maturity = 1.0;     // Option maturity in years
-            double riskFreeRate = 0.06;  // Continuously compounded risk-free rate
-            unsigned rngSeed = 24;      // Seed value
-        };
+        double normal();
+    };
+
+    // Stochastic process 
+    class StochasticProcess {
+    public:
+        virtual ~StochasticProcess() = default;
+
+        virtual double step(double S, double dt, RNG& rng) const = 0;
+
+        virtual double stepWithNormal(double S, double dt, double z) const = 0;
+    };
+
+    namespace engine {
+
+        // Path simulation function
+        PathData simulatePaths(
+            double S0,
+            const StochasticProcess& process,
+            const LSMConfig& config
+        );
 
         //simulated paths and recorded cash flows
         struct PathData {
@@ -82,4 +102,5 @@ namespace lsm{
         };
 
     } // namespace engine
+
 } // namespace lsm

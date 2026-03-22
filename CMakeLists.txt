@@ -30,4 +30,3 @@ target_include_directories(my_program PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/e
 
 enable_testing()
 add_subdirectory(tests)
-# https://stackoverflow.com/questions/12249140/find-package-eigen3-for-cmake#:~:text=find_package%20(Eigen3%203.3,preferred%20whenever%20available.
