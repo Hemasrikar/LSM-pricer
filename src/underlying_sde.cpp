@@ -16,6 +16,23 @@ double RNG::uniform01() {
 }
 
 /*-------------------------------------------------------------------------------------------------
+ * Advance the process by one step using an internally generated
+ * normal sample
+ *
+ * Parameters:
+ *    - s0  Initial value of the process.
+ *    - dt Time increment.
+ *    - rng Random number generator.
+ *
+ * Returns: The next state of the process after one time step
+ *
+---------------------------------------------------------------------------------------------------*/
+
+double StochasticProcess::step(double s, double dt, RNG& rng) const{
+    return stepWithNormal(s, dt, rng.normal(), rng);
+}
+
+/*-------------------------------------------------------------------------------------------------
  * SIMULATE A DISCRETE-TIME SAMPLE PATH OF THE PROCESS ON [0,T]
  * Generates a path by iteratively applying the one-step update defined by step() using a uniform
  * discretisation.
@@ -70,29 +87,35 @@ GeometricBrownianMotion::GeometricBrownianMotion(double r, double sigma)
 }
 
 /*-------------------------------------------------------------------------------------------------
- * Advance the GBM process by one time step.
+ * Advance the GBM process by one time step using a given normal sample.
  *
  * Uses the exact solution of the SDE:
  *     S_{t+dt} = S_t * exp((r - 0.5 * sigma^2) * dt + sigma * sqrt(dt) * Z),
  * where Z ~ N(0,1).
- *
+ * 
+ * This overload is useful when the caller wants explicit control over the
+ * diffusion shock, for example in antithetic variance reduction where the
+ * same path update is evaluated with shocks z and -z.
+ * 
  * Parameters:
  *    - s   Current value of the process.
  *    - dt  Time increment (must be positive).
+ *    - z Standard normal input used for the diffusion increment
  *    - rng Random number generator providing standard normal samples.
  *
  * Returns: The next state of the process.
  *
  * Throws: std::invalid_argument if dt <= 0.
  *
+ *  Notes: rng is not directly used here because z is already givem. Its kept
+ *  for consistency with the common interface and with models such as jump we requre
+ *  additional random draws.
 ---------------------------------------------------------------------------------------------------*/
-double GeometricBrownianMotion::step(double s, double dt, RNG& rng) const {
+double GeometricBrownianMotion::stepWithNormal(double s, double dt, double z,RNG& rng) const {
     if (dt <= 0.0) {
         throw std::invalid_argument("GeometricBrownianMotion::step: dt must be positive.");
     }
     // Sample standard normal increment
-    const double z = rng.normal();
-    // Drift and diffusion components of the log-increment
     const double drift = (r_ - 0.5 * sigma_ * sigma_) * dt;
     const double diff  = sigma_ * std::sqrt(dt) * z;
     return s * std::exp(drift + diff);
@@ -170,5 +193,40 @@ double JumpDiffusionProcess::step(double s, double dt, RNG& rng) const {
     return s * std::exp(drift + diff);
 }
 
-    }
+/*-------------------------------------------------------------------------------------------------
+ * Advance the jump diffusion process by one step using a given normal sample
+ *
+ * Method separates the diffusiona and jump components of the update. The normal sample is given,
+ * while the ransom generator is still used to decide whetehr a jump occurs
+ *
+ * Parameters:
+ *    - s   Current value of the process.
+ *    - dt  Time increment (must be positive).
+ *    - z Standard normal input used for diffusion component
+ *    - rng Random number generator.
+ *
+ * Returns: The next state of the process after one time step
+ * 
+ * Throws: std::invalid_argument if dt <= 0 or s < 0.
+ * s<= 0 is obsorbing state. 
+ * Form is useful in settings such as antithetic variance reduction
+---------------------------------------------------------------------------------------------------*/
+
+double JumpDiffusionProcess::stepWithNormal(double s, double dt, double z, RNG& rng) const {
+    if (s<= 0.0) return 0.0;
+    if (dt <= 0.0)
+        throw std::invalid_argument("JumpDiffusionProcess::stepWithNormal: dt must be positive");
+    
+    const double p_jump = 1.0 - std::exp(-lambda_ * dt );
+    if (rng.uniform01() < p_jump) return 0.0;
+
+    const double drift = ((r_ + lambda_) - 0.5 * sigma_ * sigma_) * dt;
+    const double diff  = sigma_ * std::sqrt(dt) * z;
+
+    return s * std::exp(drift + diff);
+
+}
+
+
+}
 }
