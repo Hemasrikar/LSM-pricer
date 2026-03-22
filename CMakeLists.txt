@@ -19,6 +19,7 @@ set(SRC_FILES
     ${CMAKE_SOURCE_DIR}/src/ols_regression.cpp
     ${CMAKE_SOURCE_DIR}/src/option_payoff.cpp
     ${CMAKE_SOURCE_DIR}/src/underlying_sde.cpp
+    ${CMAKE_SOURCE_DIR}/src/bs_pricer.cpp
 
 )
 
