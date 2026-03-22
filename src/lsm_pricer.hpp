@@ -9,27 +9,8 @@
 #include "basis_functions.hpp"
 #include "ols_regression.hpp"
 
-namespace lsm 
-
-    // Configuration for LSM
-    struct LSMConfig {
-        int numPaths = 0;
-        int numExerciseDates = 0;
-        double maturity = 0.0;
-        bool useAntithetic = false;
-        unsigned int rngSeed = 42;
-    };
-
-    // Path storage structure
-    struct PathData {
-        int numPaths = 0;
-        int numTimeSteps = 0;
-
-        std::vector<std::vector<double>> paths;
-
-        std::vector<std::vector<double>> cashFlows;
-    };
-
+namespace lsm {
+   /*  I dont think this is required... since we are including underlying SDE
     // RNG part
     class RNG {
     public:
@@ -37,7 +18,7 @@ namespace lsm
 
         double normal();
     };
-
+    
     // Stochastic process 
     class StochasticProcess {
     public:
@@ -47,23 +28,34 @@ namespace lsm
 
         virtual double stepWithNormal(double S, double dt, double z) const = 0;
     };
+    */ 
 
     namespace engine {
+
+        // Configuration for LSMPricer
+        struct LSMConfig {
+            int numPaths = 100000;          // total simulation paths
+            bool useAntithetic = true;      // antithetic variance reduction
+            int numExerciseDates = 50;      // early exercise opportunities
+            double maturity = 1.0;          // option maturity in years
+            double riskFreeRate = 0.06;     // continuously compounded risk-free rate
+            unsigned rngSeed = 24;          // RNG seed
+        };
+
+        // Simulated paths and recorded cash flows
+        struct PathData {
+            std::vector<std::vector<double>> paths;      // [numPaths][numTimeSteps+1]
+            std::vector<std::vector<double>> cashFlows;  // [numPaths][numTimeSteps+1]
+            int numPaths = 0;
+            int numTimeSteps = 0;
+        };
 
         // Path simulation function
         PathData simulatePaths(
             double S0,
-            const StochasticProcess& process,
-            const LSMConfig& config
+            const lsm::core::StochasticProcess& process,
+            const lsm::engine::LSMConfig& config
         );
-
-        //simulated paths and recorded cash flows
-        struct PathData {
-        std::vector<std::vector<double>> paths;      // [numPaths][numTimeSteps+1]
-        std::vector<std::vector<double>> cashFlows;  // [numPaths][numTimeSteps+1]
-        int numPaths     = 0;
-        int numTimeSteps = 0;
-        };
 
         //output of LSMPricer::price()
         struct SimulationResult {
