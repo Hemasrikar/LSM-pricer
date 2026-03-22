@@ -111,7 +111,7 @@ GeometricBrownianMotion::GeometricBrownianMotion(double r, double sigma)
  *  for consistency with the common interface and with models such as jump we requre
  *  additional random draws.
 ---------------------------------------------------------------------------------------------------*/
-double GeometricBrownianMotion::stepWithNormal(double s, double dt, double z,RNG& rng) const {
+double GeometricBrownianMotion::stepWithNormal(double s, double dt, double z,RNG& /*rng*/) const {
     if (dt <= 0.0) {
         throw std::invalid_argument("GeometricBrownianMotion::step: dt must be positive.");
     }
