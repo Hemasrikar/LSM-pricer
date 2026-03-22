@@ -15,7 +15,14 @@ namespace lsm {
             const StochasticProcess& process,
             const LSMConfig& config)
         {
-            
+
+            // Validation checks
+            if (config.numExerciseDates <= 0)
+                throw std::invalid_argument("Number of exercise dates must be positive");
+
+            if (config.numPaths <= 0)
+                throw std::invalid_argument("Number of paths must be positive");
+
            // Setting up: 
            // The number of Time Steps T 
            // The number of Monte Carlo Paths N 
