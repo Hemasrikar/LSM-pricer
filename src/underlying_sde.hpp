@@ -10,10 +10,13 @@ namespace lsm {
 
 //Random number generator
 struct RNG {
-    std::mt19937_64                        engine{std::random_device{}()};
+    std::mt19937_64                        engine;
     std::normal_distribution<double>       norm_dist{0.0, 1.0};
     std::uniform_real_distribution<double> uniform_dist{0.0, 1.0};
 
+    RNG() : engine(std::random_device{}()) {}
+    explicit RNG(unsigned seed) : engine(seed) {}
+    
     double normal();    //GENERATES FROM N(0,1)
     double uniform01(); //GENERATES FROM U(0,1)
 };
@@ -26,7 +29,7 @@ class StochasticProcess {
         //Advance by one step given an explicit N(0,1)
         virtual double stepWithNormal(double s, double dt, double z, RNG& rng) const = 0;
         // Advance the process by one time step.
-        virtual double step(double s, double dt, RNG& rng) const = 0;
+        virtual double step(double s, double dt, RNG& rng) const;
 
          // Simulate a path of length n+1 over [0, T], starting from S0.
         std::vector<double> simulatePath(double S0, double T, std::size_t n, RNG& rng) const;
