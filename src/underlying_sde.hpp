@@ -42,7 +42,7 @@ public:
     GeometricBrownianMotion(double r, double sigma);
 
     // Exact solution: S_{t+dt} = S_t exp((r - sigma^2/2)dt + sigma sqrt(dt) z)
-    double stepWithNormal(double s, double dt, double z, RNG& rng) const override;
+    double stepWithNormal(double s, double dt, double z, RNG& /*rng*/ ) const override;
 
     double r() const { return r_; }
 
