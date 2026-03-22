@@ -140,8 +140,8 @@ namespace lsm {
         // const StochasticProcess & process refers back to an object that represents the stochastic model
         PathData simulatePaths(
             double S0,
-            const StochasticProcess& process,
-            const LSMConfig& config)
+            const lsm::core::StochasticProcess& process,
+            const lsm::engine::LSMConfig& config)
         {
 
             // Validation checks
@@ -180,10 +180,9 @@ namespace lsm {
             }
 
             // Setting up the random number generator 
+            
+            lsm::core::RNG  rng(config.rngSeed);
             // Checking if require to use monte carlo or antithetic variates
-            RNG rng(config.rngSeed);
-
-
             // Monte Carlo Simulation part
             if (!config.useAntithetic)
             {
@@ -227,10 +226,10 @@ namespace lsm {
                         double z = rng.normal();
 
                         // Normal path
-                        p1[t] = process.stepWithNormal(p1[t - 1], dt,  z);
+                        p1[t] = process.stepWithNormal(p1[t - 1], dt,  z, rng);
 
                         // Antithetic path
-                        p2[t] = process.stepWithNormal(p2[t - 1], dt, -z);
+                        p2[t] = process.stepWithNormal(p2[t - 1], dt, -z, rng);
                     }
                 }
             }
