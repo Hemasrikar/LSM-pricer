@@ -8,35 +8,54 @@
 namespace lsm{
     namespace analysis{
 
-        // defined functions to get the prices from each of the different calculation methodologies
-        double getBSPrice(double S0, double r, double sigma, double K, double T, bool call) {
-            return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, call);
+        // initialise the class
+        ConvergenceAnalyser::ConvergenceAnalyser(double s, double rate, double vol, double strike, double maturity, bool call) 
+            : S0(s), r(rate), sigma(vol), K(strike), T(maturity), isCall(call) 
+        {
+            
         }
 
-        double getFDPrice() {
+        // helper functions
+        double ConvergenceAnalyser::getBSPrice() {
+            return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, isCall);
+        }
+
+        double ConvergenceAnalyser::getFDPrice() {
             // insert logic to get the fd prices
             return 10.5; //placeholder
         }
 
-        double getLSMPrice() {
-            // engine::LSMConfig config;
-            // config.rngSeed = seed;
-            // insert logic for the lsm prices
-            return 10.5; //placeholder
+        double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths) {
+            lsm::engine::LSMConfig config; 
+            config.rngSeed = seed;
+            config.numExerciseDates = numExerciseDates;
+
+            lsm::core::StochasticProcess* process = new lsm::core::GeometricBrownianMotion(r, sigma);
+            lsm::core::OptionPayoff* payoff  = new lsm::core::Call_payoff(K);
+            lsm::core::BasisSet* basis = new lsm::core::BasisSet();
+    
+            basis->makeLaguerreSet(order);
+
+            // uncomment once the pricer is complete
+            // lsm::engine::LSMPricer myPricer(process, payoff, basis, config);
+            // auto result = myPricer.price(S0);
+
+            delete process;
+            delete payoff;
+            delete basis;
+
+            // return result.optionValue;
+
+            return 10.7;
         }
 
     // Code to run a one off check against BS
-    void runBenchmark() {
+    void ConvergenceAnalyser::runBenchmark() {
         // set up the parameter vectors for the benchmark test
             std::vector<double> S0s   = {90.0, 100.0, 110.0};
             std::vector<double> sigmas = {0.2, 0.4};
             std::vector<double> Ts     = {1.0, 2.0};
 
-            double r = 0.05;
-            double K = 100.0;
-            bool call = true;
-
-            std::cout << "--- BENCHMARK REPORT ---" << std::endl;
             std::cout << std::left << std::setw(8)  << "S0"
                 << std::setw(8)  << "Sigma"
                 << std::setw(8)  << "T"
@@ -46,20 +65,25 @@ namespace lsm{
                 << std::setw(15) << "LSM American" << std::endl;
 
 
-            for (double S0 : S0s) {
-                for (double sigma : sigmas) {
-                    for (double T : Ts) {
+            for (double s : S0s) {
+                for (double vol : sigmas) {
+                    for (double mat : Ts) {
+
+                        this->S0 = s;
+                        this->sigma = vol;
+                        this->T = mat;
+
                         // get the black scholes, fd and lsm prices
-                        double bsPrice = getBSPrice(S0, r, sigma, K, T, call);
+                        double bsPrice = getBSPrice();
                         double fdPrice = getFDPrice();
-                        double lsmPrice = getLSMPrice();
+                        double lsmPrice = getLSMPrice(24, 50, 3, 10000);
 
                         // compute the premium you pay for having early exercise
                         double eeValue = std::abs(bsPrice - fdPrice); 
 
-                        std::cout << std::left << std::setw(8) << S0
-                            << std::setw(8)  << sigma
-                            << std::setw(8)  << T
+                        std::cout << std::left << std::setw(8) << s
+                            << std::setw(8)  << vol
+                            << std::setw(8)  << mat
                             << std::setw(15) << bsPrice
                             << std::setw(15) << fdPrice
                             << std::setw(22) << eeValue
@@ -70,32 +94,51 @@ namespace lsm{
 
     }
 
-    //     // Code to run the convergence
-    //     void runConvergence() {
+    void ConvergenceAnalyser::runConvergence(const std::string& mode) {
+        std::vector<int> list;
+        std::string name;
 
-    //         // set up the parameters for the benchmark test
-    //         double S0 = 100.0;
-    //         double r = 0.05;
-    //         double sigma = 0.2;
-    //         double K = 100.0;
-    //         double T = 1.0;
-    //         bool call = true;
+        if (mode == "pathCount"){
+            list = {1000, 5000, 10000, 50000, 100000};
+            name = "Number of Paths";
+        }
 
-    //         // get the true price from the black scholes model
-    //         double truePrice = getBSPrice(S0, r, sigma, K, T, call);
+        else if(mode == "order"){
+            list = {1, 2, 3, 4, 5};
+            name = "Order of Basis";
+        }
 
-    //         // define seeds to test
-    //         std::vector<unsigned> seeds = {24, 42, 123, 777, 2026};
+        else if (mode == "numExerciseDates"){
+            list = {1, 10, 100, 1000, 10000};
+            name = "Number of Exercise Dates";
 
-    //         // iterate 5 times to get 5 different prices
-    //         for (unsigned seed : seeds) {
-    //             double lsmPrice = getLSMPrice(seed);
+        }
 
-    //             double error = std::abs(truePrice - lsmPrice);
-    //             std::cout << "Error: " << error << std::endl;
+            // set up the parameters for the convergence test
+            int numExerciseDates = 50;
+            int pathCount = 3;
+            int order = 3;
+            // bool call = true;
 
-    //         }
-    // }
+            double truePrice = getFDPrice();
+
+            for (int i : list){
+                double lsmPrice;
+
+                if (mode == "pathCount")
+                    lsmPrice = getLSMPrice(24, numExerciseDates, order, i);
+                else if (mode == "order")
+                    lsmPrice = getLSMPrice(24, numExerciseDates, i, pathCount);
+                else if (mode == "numExerciseDates")
+                    lsmPrice = getLSMPrice(24, i, order, pathCount);
+
+                double error = std::abs(truePrice - lsmPrice);
+
+                std::cout << name << std::setw(15) << i 
+                                << " | Price: " << std::setw(10) << lsmPrice 
+                                << " | Error: " << error << std::endl;
+        }
+    }
 
 
     } //namespace analysis
