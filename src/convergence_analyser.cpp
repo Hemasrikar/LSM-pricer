@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+
 
 namespace lsm{
     namespace analysis{
@@ -97,20 +99,24 @@ namespace lsm{
     void ConvergenceAnalyser::runConvergence(const std::string& mode) {
         std::vector<int> list;
         std::string name;
+        std::string filename;
 
         if (mode == "pathCount"){
             list = {1000, 5000, 10000, 50000, 100000};
             name = "Number of Paths";
+            filename = "csv_output/path_convergence.csv";
         }
 
         else if(mode == "order"){
             list = {1, 2, 3, 4, 5};
             name = "Order of Basis";
+            filename = "csv_output/order_convergence.csv";
         }
 
         else if (mode == "numExerciseDates"){
             list = {1, 10, 100, 1000, 10000};
             name = "Number of Exercise Dates";
+            filename = "csv_output/exercise_dates_convergence.csv";
 
         }
 
@@ -121,6 +127,9 @@ namespace lsm{
             // bool call = true;
 
             double truePrice = getFDPrice();
+
+            std::ofstream out(filename);
+            out << name << ",LSMPrice,TruePrice,Error\n";
 
             for (int i : list){
                 double lsmPrice;
@@ -133,11 +142,15 @@ namespace lsm{
                     lsmPrice = getLSMPrice(24, i, order, pathCount);
 
                 double error = std::abs(truePrice - lsmPrice);
+                out << i << "," << lsmPrice << "," << truePrice << "," << error << "\n";
 
                 std::cout << name << std::setw(15) << i 
                                 << " | Price: " << std::setw(10) << lsmPrice 
                                 << " | Error: " << error << std::endl;
         }
+
+        out.close();
+        std::cout << "Convergence data written to " << filename << std::endl;
     }
 
 
