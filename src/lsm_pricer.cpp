@@ -8,11 +8,11 @@
 namespace lsm {
     namespace engine {
 
+        
         // Define the function simulatePaths with return type as PathData
         // With S0 initial price 
         // const StochasticProcess & process refers back to an object that represents the stochastic model
-        PathData simulatePaths(
-            double S0,
+        PathData simulatePaths(double S0,
             const lsm::core::StochasticProcess& process,
             const lsm::engine::LSMConfig& config)
         {
@@ -24,23 +24,25 @@ namespace lsm {
             if (config.numPaths <= 0)
                 throw std::invalid_argument("Number of paths must be positive");
 
+
            // Setting up: 
            // The number of Time Steps T 
            // The number of Monte Carlo Paths N 
            // The size of the step dt
             const int T = config.numExerciseDates;
 
+
             // Ensure even number of paths when using antithetic variates
-            const int N = config.useAntithetic
-                ? config.numPaths - (config.numPaths % 2)
-                : config.numPaths;
+            const int N = config.useAntithetic ? config.numPaths - (config.numPaths % 2) : config.numPaths;
 
             const double dt = config.maturity / static_cast<double>(T);
+
 
             // Creating a result to store the data
             PathData data;
             data.numPaths = N;
             data.numTimeSteps = T;
+
 
             // Allocating the memory and time steps
             data.paths.resize(N);
@@ -52,20 +54,22 @@ namespace lsm {
                 data.cashFlows[i].resize(T + 1, 0.0); 
             }
 
+
             // Setting up the random number generator 
-            
             lsm::core::RNG  rng(config.rngSeed);
+
+
             // Checking if require to use monte carlo or antithetic variates
             // Monte Carlo Simulation part
             if (!config.useAntithetic)
             {
+
                 // Monte Carlo loop reference path 
                 // Setting the price S0 as starting value of the path
                 for (int i = 0; i < N; ++i)
                 {
                     auto& path = data.paths[i];
 
-                    
                     path[0] = S0;
 
                     // Time evolution for each time step
@@ -75,6 +79,7 @@ namespace lsm {
                     }
                 }
             }
+
 
             // Antithetic Variates Simulation part
             else
@@ -91,6 +96,7 @@ namespace lsm {
 
                     p1[0] = S0;
                     p2[0] = S0;
+
 
                     // Time evolution and random shock z standard normal 
                     // For both paths which includes the antithetic path p2
@@ -109,6 +115,7 @@ namespace lsm {
 
             return data;
         }
+
 
         std::vector<double> LSMPricer::backwardInduction(PathData& data) const
     {
