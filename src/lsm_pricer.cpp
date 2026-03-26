@@ -110,7 +110,7 @@ namespace lsm {
             return data;
         }
 
-        std::vector<double> LSMPricer::backwardInduction(PathData& data) const
+    std::vector<double> LSMPricer::backwardInduction(PathData& data) const
     {
     //num of simulated paths
     int numPaths = data.numPaths;
@@ -230,6 +230,26 @@ namespace lsm {
 
         return result;
 
+    }
+
+    SimulationResult LSMPricer::price(double S0) {
+        // simulate paths
+        PathData data = lsm::engine::simulatePaths(S0, *process, config);
+        const int N = data.numPaths;
+        const int T = data.numTimeSteps;
+
+        // european benchmark - mean discounted terminal payoff
+        const double totalDisc = std::exp(-config.riskFreeRate * config.maturity);
+        double euSum = 0.0;
+        for (int i = 0; i < N; ++i)
+            euSum += payoff -> payoff(data.paths[i][T]);
+        const double europeanValue = (euSum / N) * totalDisc;
+
+        // backward induction returns per path PV at time 0
+        std::vector<double> pv = backwardInduction(data);
+
+        // compute statistics
+        return computeOptionValue(pv, europeanValue, N, T);
     }
 
     } // namespace engine
