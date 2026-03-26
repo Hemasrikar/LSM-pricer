@@ -255,10 +255,14 @@ namespace lsm {
         return result;
 
     }
+    PathData LSMPricer::simulatePaths(double S0) const
+    {
+        return lsm::engine::simulatePaths(S0, *process, config);
+    }
 
     SimulationResult LSMPricer::price(double S0) {
         // simulate paths
-        PathData data = lsm::engine::simulatePaths(S0, *process, config);
+        PathData data = simulatePaths(S0);
         const int N = data.numPaths;
         const int T = data.numTimeSteps;
 
@@ -275,6 +279,6 @@ namespace lsm {
         // compute statistics
         return computeOptionValue(pv, europeanValue, N, T);
     }
-
+    
     } // namespace engine
 } // namespace lsm
