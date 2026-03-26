@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <memory>
 #include "underlying_sde.hpp"
 #include "option_payoff.hpp"
 #include "basis_functions.hpp"
@@ -44,18 +45,19 @@ namespace lsm {
         int    numExerciseDates     = 0;
         };
 
-        class LSMPricer{
+                class LSMPricer{
         public:
-            LSMPricer(lsm::core::StochasticProcess* process,
-              lsm::core::OptionPayoff* payoff,
-              lsm::core::BasisSet* basis,
-              const lsm::engine::LSMConfig& config);
+            LSMPricer(
+                std::unique_ptr<const lsm::core::StochasticProcess> process,
+                std::unique_ptr<const lsm::core::OptionPayoff> payoff,
+                std::unique_ptr<lsm::core::BasisSet> basis,
+                const lsm::engine::LSMConfig& config);
             
-              lsm::engine::SimulationResult price(double S0);
+                lsm::engine::SimulationResult price(double S0);
         private:
-            lsm::core::StochasticProcess* process;
-            lsm::core::OptionPayoff* payoff;
-            lsm::core::BasisSet* basis;
+            std::unique_ptr<const lsm::core::StochasticProcess> process;
+            std::unique_ptr<const lsm::core::OptionPayoff>      payoff;
+            std::unique_ptr<lsm::core::BasisSet>                basis;
 
             lsm::engine::LSMConfig config;
 

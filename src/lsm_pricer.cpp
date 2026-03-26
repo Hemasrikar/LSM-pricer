@@ -8,7 +8,24 @@
 namespace lsm {
     namespace engine {
 
-        
+            LSMPricer::LSMPricer(
+            std::unique_ptr<const lsm::core::StochasticProcess> process,
+            std::unique_ptr<const lsm::core::OptionPayoff> payoff,
+            std::unique_ptr<lsm::core::BasisSet> basis,
+            const lsm::engine::LSMConfig& config)
+            : process(std::move(process)), payoff(std::move(payoff)), basis(std::move(basis)), config(config)
+            {
+                if (!this->process) {
+                    throw std::invalid_argument("LSMPricer received null process pointer");
+                }
+                if (!this->payoff) {
+                    throw std::invalid_argument("LSMPricer received null payoff pointer");
+                }
+                if (!this->basis) {
+                    throw std::invalid_argument("LSMPricer received null basis pointer");
+                }
+            }
+
         // Define the function simulatePaths with return type as PathData
         // With S0 initial price 
         // const StochasticProcess & process refers back to an object that represents the stochastic model
