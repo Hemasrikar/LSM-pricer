@@ -93,15 +93,8 @@ std::vector<double> Ols_regression(
     // https://libeigen.gitlab.io/eigen/docs-3.3/group__LeastSquares.html#:~:text=and%20decompositions%20.-,Using%20the%20QR%20decomposition,-The%20solve()%20method
     Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);  // Solve OLS via QR decomposition: beta = (X'X)^{-1} X'Y
 
-    std::vector<double> C_hat(N, 0.0); // Predict continuation values for all paths; OTM paths get 0.0
-    for (std::size_t i = 0; i < N; ++i) {
-        if (!itm[i]) continue;
-        double val = 0.0;
-        for (int k = 0; k < K; ++k)
-            val += beta(k) * basis.basis[k]->evaluate(S_t[i]);
-        C_hat[i] = val;
-    }
-    return C_hat;
+    std::vector<double> result(beta.data(), beta.data() + K);
+    return result;
 }
 // Potential discussion on code performance: https://scicomp.stackexchange.com/questions/3159/is-it-a-good-idea-to-use-vectorvectordouble-to-form-a-matrix-class-for-high
 
