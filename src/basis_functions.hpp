@@ -1,5 +1,4 @@
 #pragma once
-#include "lsm_pricer.hpp"
 #include <cmath>
 #include <string>
 #include <stdexcept>
@@ -8,6 +7,13 @@
 
 namespace lsm{
     namespace core{
+
+        class BasisFunction {
+        public:
+            virtual ~BasisFunction() = default;
+            virtual double evaluate(double x) const = 0;
+            virtual std::string name() const = 0;
+        };
 
         // ConstantBasis
         // intercept term, evaluates to 1.0 for any given value
