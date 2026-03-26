@@ -5,3 +5,5 @@ tests/IO/*
 !tests/IO/*output*
 !tests/IO/*input*
 .DS_Store
+/csv_output/*
+!/csv_output/.gitkeep
