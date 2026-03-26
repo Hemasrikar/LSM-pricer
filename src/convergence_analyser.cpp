@@ -31,24 +31,22 @@ namespace lsm{
             lsm::engine::LSMConfig config; 
             config.rngSeed = seed;
             config.numExerciseDates = numExerciseDates;
+            config.numPaths = numPaths;
 
-            lsm::core::StochasticProcess* process = new lsm::core::GeometricBrownianMotion(r, sigma);
-            lsm::core::OptionPayoff* payoff  = new lsm::core::Call_payoff(K);
-            lsm::core::BasisSet* basis = new lsm::core::BasisSet();
+            auto process = std::make_unique<lsm::core::GeometricBrownianMotion>(r, sigma);
+            auto payoff  = std::make_unique<lsm::core::Call_payoff>(K);
+            auto basis   = std::make_unique<lsm::core::BasisSet>();
     
             basis->makeLaguerreSet(order);
+            // std::cout << "DEBUG: numTerms in basis = " << basis->basis.size() << std::endl;
 
             // uncomment once the pricer is complete
-            // lsm::engine::LSMPricer myPricer(process, payoff, basis, config);
-            // auto result = myPricer.price(S0);
+            lsm::engine::LSMPricer myPricer(std::move(process), std::move(payoff), std::move(basis), config);
+            auto result = myPricer.price(S0);
 
-            delete process;
-            delete payoff;
-            delete basis;
+            return result.optionValue;
 
-            // return result.optionValue;
-
-            return 10.7;
+            // return 10.7;
         }
 
     // Code to run a one off check against BS
@@ -102,7 +100,7 @@ namespace lsm{
         std::string filename;
 
         if (mode == "pathCount"){
-            list = {1000, 5000, 10000, 50000, 100000};
+            list = {1, 10, 100, 1000, 10000, 100000};
             name = "Number of Paths";
             filename = "csv_output/path_convergence.csv";
         }
@@ -114,7 +112,7 @@ namespace lsm{
         }
 
         else if (mode == "numExerciseDates"){
-            list = {1, 10, 100, 1000, 10000};
+            list = {1, 5, 10, 20, 50, 100};
             name = "Number of Exercise Dates";
             filename = "csv_output/exercise_dates_convergence.csv";
 
@@ -122,7 +120,7 @@ namespace lsm{
 
             // set up the parameters for the convergence test
             int numExerciseDates = 50;
-            int pathCount = 3;
+            int pathCount = 10000;
             int order = 3;
             // bool call = true;
 
@@ -140,6 +138,10 @@ namespace lsm{
                     lsmPrice = getLSMPrice(24, numExerciseDates, i, pathCount);
                 else if (mode == "numExerciseDates")
                     lsmPrice = getLSMPrice(24, i, order, pathCount);
+                else {
+                    std::cout << "Incorrect mode" << std::endl;
+                    break;
+                }
 
                 double error = std::abs(truePrice - lsmPrice);
                 out << i << "," << lsmPrice << "," << truePrice << "," << error << "\n";
