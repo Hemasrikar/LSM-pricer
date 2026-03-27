@@ -8,14 +8,32 @@
 namespace lsm {
     namespace engine {
 
+    LSMPricer::LSMPricer(
+    std::unique_ptr<const lsm::core::StochasticProcess> process,
+    std::unique_ptr<const lsm::core::OptionPayoff> payoff,
+    std::unique_ptr<lsm::core::BasisSet> basis,
+    const lsm::engine::LSMConfig& config)
+    : process(std::move(process)), payoff(std::move(payoff)), basis(std::move(basis)), config(config)
+    {
+        if (!this->process) {
+            throw std::invalid_argument("LSMPricer received null process pointer");
+        }
+        if (!this->payoff) {
+            throw std::invalid_argument("LSMPricer received null payoff pointer");
+        }
+        if (!this->basis) {
+            throw std::invalid_argument("LSMPricer received null basis pointer");
+        }
+    }
+
         // Define the function simulatePaths with return type as PathData
         // With S0 initial price 
         // const StochasticProcess & process refers back to an object that represents the stochastic model
-        PathData simulatePaths(
-            double S0,
-            const lsm::core::StochasticProcess& process,
-            const lsm::engine::LSMConfig& config)
-        {
+    PathData simulatePaths(
+        double S0,
+        const lsm::core::StochasticProcess& process,
+        const lsm::engine::LSMConfig& config)
+    {
 
             // Validation checks
             if (config.numExerciseDates <= 0)
@@ -24,23 +42,25 @@ namespace lsm {
             if (config.numPaths <= 0)
                 throw std::invalid_argument("Number of paths must be positive");
 
+
            // Setting up: 
            // The number of Time Steps T 
            // The number of Monte Carlo Paths N 
            // The size of the step dt
             const int T = config.numExerciseDates;
 
+
             // Ensure even number of paths when using antithetic variates
-            const int N = config.useAntithetic
-                ? config.numPaths - (config.numPaths % 2)
-                : config.numPaths;
+            const int N = config.useAntithetic ? config.numPaths - (config.numPaths % 2) : config.numPaths;
 
             const double dt = config.maturity / static_cast<double>(T);
+
 
             // Creating a result to store the data
             PathData data;
             data.numPaths = N;
             data.numTimeSteps = T;
+
 
             // Allocating the memory and time steps
             data.paths.resize(N);
@@ -52,20 +72,22 @@ namespace lsm {
                 data.cashFlows[i].resize(T + 1, 0.0); 
             }
 
+
             // Setting up the random number generator 
-            
             lsm::core::RNG  rng(config.rngSeed);
+
+
             // Checking if require to use monte carlo or antithetic variates
             // Monte Carlo Simulation part
             if (!config.useAntithetic)
             {
+
                 // Monte Carlo loop reference path 
                 // Setting the price S0 as starting value of the path
                 for (int i = 0; i < N; ++i)
                 {
                     auto& path = data.paths[i];
 
-                    
                     path[0] = S0;
 
                     // Time evolution for each time step
@@ -75,6 +97,7 @@ namespace lsm {
                     }
                 }
             }
+
 
             // Antithetic Variates Simulation part
             else
@@ -91,6 +114,7 @@ namespace lsm {
 
                     p1[0] = S0;
                     p2[0] = S0;
+
 
                     // Time evolution and random shock z standard normal 
                     // For both paths which includes the antithetic path p2
@@ -109,8 +133,8 @@ namespace lsm {
 
             return data;
         }
-
-        std::vector<double> LSMPricer::backwardInduction(PathData& data) const
+    
+    std::vector<double> LSMPricer::backwardInduction(PathData& data) const
     {
     //num of simulated paths
     int numPaths = data.numPaths;
@@ -230,6 +254,26 @@ namespace lsm {
 
         return result;
 
+    }
+
+    SimulationResult LSMPricer::price(double S0) {
+        // simulate paths
+        PathData data = lsm::engine::simulatePaths(S0, *process, config);
+        const int N = data.numPaths;
+        const int T = data.numTimeSteps;
+
+        // european benchmark - mean discounted terminal payoff
+        const double totalDisc = std::exp(-config.riskFreeRate * config.maturity);
+        double euSum = 0.0;
+        for (int i = 0; i < N; ++i)
+            euSum += payoff -> payoff(data.paths[i][T]);
+        const double europeanValue = (euSum / N) * totalDisc;
+
+        // backward induction returns per path PV at time 0
+        std::vector<double> pv = backwardInduction(data);
+
+        // compute statistics
+        return computeOptionValue(pv, europeanValue, N, T);
     }
 
     } // namespace engine

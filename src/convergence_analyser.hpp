@@ -8,16 +8,30 @@
 namespace lsm{
     namespace analysis{
 
-        double getBSPrice(double S0, double r, double sigma, double K, double T);
+        class ConvergenceAnalyser {
+        // defines the variables which only the class can see
+        private:
+            double S0, r, sigma, K, T;
+            bool isCall;
 
-        double getFDPrice();
+        // defines the functions which can be accessed outside of the class
+        public:
+            ConvergenceAnalyser(double s, double r, double sigma, double K, double T, bool call);
 
-        double getLSMPrice(unsigned seed);
+            // helper functions to get the prices
 
-        // void runConvergence();
+            double getBSPrice();
 
-        void runBenchmark();
+            double getFDPrice();
 
+            double getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag);
+
+            // functions to run the convergence analysis
+
+            void runBenchmark();
+
+            void runConvergence(const std::string& mode, bool isLag);
+        };
     } // namespace analysis
 
 } // namespace lsm

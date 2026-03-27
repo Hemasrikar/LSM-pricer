@@ -8,3 +8,9 @@ add_executable(test_bs_pricer ${SRC_FILES} test_bs_pricer.cpp)
 target_include_directories(test_bs_pricer PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(test_bs_pricer PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
 add_test(NAME test_bs_pricer COMMAND test_bs_pricer)
+
+
+add_executable(test_convergence_analyser ${SRC_FILES} test_convergence_analyser.cpp)
+target_include_directories(test_convergence_analyser PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(test_convergence_analyser PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
+add_test(NAME test_convergence_analyser COMMAND test_convergence_analyser)
