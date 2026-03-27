@@ -24,13 +24,13 @@ namespace lsm{
 
             double getFDPrice();
 
-            double getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths);
+            double getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag);
 
             // functions to run the convergence analysis
 
             void runBenchmark();
 
-            void runConvergence(const std::string& mode);
+            void runConvergence(const std::string& mode, bool isLag);
         };
     } // namespace analysis
 

@@ -26,6 +26,9 @@ set(SRC_FILES
 add_executable(my_program ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)
 target_include_directories(my_program PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
 
+add_executable(convergence_tool ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/generate_convergence_output.cpp)
+target_include_directories(convergence_tool PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
+
 ####################### TESTING STUFF STARTS HERE ###########################################################
 
 enable_testing()

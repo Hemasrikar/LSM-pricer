@@ -45,7 +45,7 @@ namespace lsm {
         int    numExerciseDates     = 0;
         };
 
-        class LSMPricer{
+                class LSMPricer{
         public:
             LSMPricer(
                 std::unique_ptr<const lsm::core::StochasticProcess> process,

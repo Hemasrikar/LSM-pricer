@@ -24,31 +24,30 @@ namespace lsm{
 
         double ConvergenceAnalyser::getFDPrice() {
             // insert logic to get the fd prices
-            return 10.5; //placeholder
+            return 19.7; //placeholder
         }
 
-        double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths) {
+        double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag) {
             lsm::engine::LSMConfig config; 
             config.rngSeed = seed;
             config.numExerciseDates = numExerciseDates;
+            config.numPaths = numPaths;
 
-            lsm::core::StochasticProcess* process = new lsm::core::GeometricBrownianMotion(r, sigma);
-            lsm::core::OptionPayoff* payoff  = new lsm::core::Call_payoff(K);
-            lsm::core::BasisSet* basis = new lsm::core::BasisSet();
-    
-            basis->makeLaguerreSet(order);
+            auto process = std::make_unique<lsm::core::GeometricBrownianMotion>(r, sigma);
+            auto payoff  = std::make_unique<lsm::core::Call_payoff>(K);
+            auto basis   = std::make_unique<lsm::core::BasisSet>();
 
-            // uncomment once the pricer is complete
-            // lsm::engine::LSMPricer myPricer(process, payoff, basis, config);
-            // auto result = myPricer.price(S0);
+            if (isLag == true){
+                basis->makeLaguerreSet(order);
+            }
+            else{
+                basis->makeMonomialSet(order);
+            }
 
-            delete process;
-            delete payoff;
-            delete basis;
+            lsm::engine::LSMPricer myPricer(std::move(process), std::move(payoff), std::move(basis), config);
+            auto result = myPricer.price(S0);
 
-            // return result.optionValue;
-
-            return 10.7;
+            return result.optionValue;
         }
 
     // Code to run a one off check against BS
@@ -78,10 +77,10 @@ namespace lsm{
                         // get the black scholes, fd and lsm prices
                         double bsPrice = getBSPrice();
                         double fdPrice = getFDPrice();
-                        double lsmPrice = getLSMPrice(24, 50, 3, 10000);
+                        double lsmPrice = getLSMPrice(24, 50, 3, 100000, true);
 
                         // compute the premium you pay for having early exercise
-                        double eeValue = std::abs(bsPrice - fdPrice); 
+                        double eeValue = lsmPrice - bsPrice; 
 
                         std::cout << std::left << std::setw(8) << s
                             << std::setw(8)  << vol
@@ -96,33 +95,32 @@ namespace lsm{
 
     }
 
-    void ConvergenceAnalyser::runConvergence(const std::string& mode) {
+    void ConvergenceAnalyser::runConvergence(const std::string& mode, bool isLag) {
         std::vector<int> list;
         std::string name;
         std::string filename;
 
-        if (mode == "pathCount"){
-            list = {1000, 5000, 10000, 50000, 100000};
-            name = "Number of Paths";
-            filename = "csv_output/path_convergence.csv";
-        }
+        std::string basisLabel = isLag ? "laguerre" : "monomial";
 
+        if (mode == "pathCount"){
+            list = {10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000};
+            name = "Number of Paths";
+            filename = "csv_output/" + basisLabel + "_path_convergence.csv";
+        }
         else if(mode == "order"){
             list = {1, 2, 3, 4, 5};
             name = "Order of Basis";
-            filename = "csv_output/order_convergence.csv";
+            filename = "csv_output/" + basisLabel + "_order_convergence.csv";
         }
-
         else if (mode == "numExerciseDates"){
-            list = {1, 10, 100, 1000, 10000};
+            list = {1, 5, 10, 20, 50, 100};
             name = "Number of Exercise Dates";
-            filename = "csv_output/exercise_dates_convergence.csv";
-
+            filename = "csv_output/" + basisLabel + "_exercise_dates_convergence.csv";
         }
 
             // set up the parameters for the convergence test
             int numExerciseDates = 50;
-            int pathCount = 3;
+            int pathCount = 10000;
             int order = 3;
             // bool call = true;
 
@@ -135,11 +133,15 @@ namespace lsm{
                 double lsmPrice;
 
                 if (mode == "pathCount")
-                    lsmPrice = getLSMPrice(24, numExerciseDates, order, i);
+                    lsmPrice = getLSMPrice(24, numExerciseDates, order, i, isLag);
                 else if (mode == "order")
-                    lsmPrice = getLSMPrice(24, numExerciseDates, i, pathCount);
+                    lsmPrice = getLSMPrice(24, numExerciseDates, i, pathCount, isLag);
                 else if (mode == "numExerciseDates")
-                    lsmPrice = getLSMPrice(24, i, order, pathCount);
+                    lsmPrice = getLSMPrice(24, i, order, pathCount, isLag);
+                else {
+                    std::cout << "Incorrect mode" << std::endl;
+                    break;
+                }
 
                 double error = std::abs(truePrice - lsmPrice);
                 out << i << "," << lsmPrice << "," << truePrice << "," << error << "\n";
