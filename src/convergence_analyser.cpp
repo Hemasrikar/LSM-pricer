@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <chrono>
 
 
 namespace lsm{
@@ -32,9 +33,15 @@ namespace lsm{
             config.rngSeed = seed;
             config.numExerciseDates = numExerciseDates;
             config.numPaths = numPaths;
+            config.riskFreeRate = r;
+            config.maturity = T;
 
             auto process = std::make_unique<lsm::core::GeometricBrownianMotion>(r, sigma);
-            auto payoff  = std::make_unique<lsm::core::Call_payoff>(K);
+            std::unique_ptr<lsm::core::OptionPayoff> payoff;
+            if (isCall)
+                payoff = std::make_unique<lsm::core::Call_payoff>(K);
+            else
+                payoff = std::make_unique<lsm::core::Put_payoff>(K);
             auto basis   = std::make_unique<lsm::core::BasisSet>();
 
             if (isLag == true){
@@ -127,10 +134,12 @@ namespace lsm{
             double truePrice = getFDPrice();
 
             std::ofstream out(filename);
-            out << name << ",LSMPrice,TruePrice,Error\n";
+            out << name << ",LSMPrice,TruePrice,Error,Time(ms)\n";
 
             for (int i : list){
                 double lsmPrice;
+
+                auto start = std::chrono::high_resolution_clock::now();
 
                 if (mode == "pathCount")
                     lsmPrice = getLSMPrice(24, numExerciseDates, order, i, isLag);
@@ -143,17 +152,21 @@ namespace lsm{
                     break;
                 }
 
+                auto end = std::chrono::high_resolution_clock::now();
+                double ms = std::chrono::duration<double, std::milli>(end - start).count();
+
                 double error = std::abs(truePrice - lsmPrice);
                 out << i << "," << lsmPrice << "," << truePrice << "," << error << "\n";
 
                 std::cout << name << std::setw(15) << i 
                                 << " | Price: " << std::setw(10) << lsmPrice 
-                                << " | Error: " << error << std::endl;
+                                << " | Error: " << error
+                                << " | Time: " << ms << " ms" << std::endl;
         }
 
         out.close();
         std::cout << "Convergence data written to " << filename << std::endl;
-    }
+}
 
 
     } //namespace analysis

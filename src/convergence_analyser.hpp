@@ -31,6 +31,8 @@ namespace lsm{
             void runBenchmark();
 
             void runConvergence(const std::string& mode, bool isLag);
+
+            void runSeedStability(const std::string& mode, bool isLag);
         };
     } // namespace analysis
 
