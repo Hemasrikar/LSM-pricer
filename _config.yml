@@ -2,7 +2,5 @@ title: LSM American Option Pricer
 description: This project implements the Longstaff-Schwartz Least Squares Monte Carlo (LSM) algorithm for pricing American options in C++20
 theme: minima
 kramdown:
-  math_engine: mathjax
-  math_engine_opts:
-    preview: false
+  math_engine: null
   syntax_highlighter: rouge
