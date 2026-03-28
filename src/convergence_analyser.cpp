@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <fstream>
 #include <chrono>
+#include <cmath>
 
 
 namespace lsm{
@@ -130,7 +131,6 @@ namespace lsm{
             int numExerciseDates = 50;
             int pathCount = 10000;
             int order = 3;
-            // bool call = true;
 
             double truePrice = getFDPrice(isCall);
 
@@ -167,7 +167,57 @@ namespace lsm{
 
         out.close();
         std::cout << "Convergence data written to " << filename << std::endl;
-}
+    }
+
+    void ConvergenceAnalyser::runSeedStability(bool isLag, bool isCall) {
+        std::vector<int> seeds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+        std::string basisLabel = isLag ? "laguerre" : "monomial";
+        std::string callLabel  = isCall ? "call" : "put";
+        std::string filename   = "csv_output/" + callLabel + "_" + basisLabel + "_seed_stability.csv";
+
+        int numExerciseDates = 50;
+        int pathCount        = 10000;
+        int order            = 3;
+
+        double truePrice = getFDPrice(isCall);
+
+        std::ofstream out(filename);
+        out << "Seed,LSMPrice,TruePrice,Error,Time(ms)\n";
+
+        std::vector<double> prices;
+
+        for (int seed : seeds) {
+            auto start      = std::chrono::high_resolution_clock::now();
+            double lsmPrice = getLSMPrice(seed, numExerciseDates, order, pathCount, isLag);
+            auto end        = std::chrono::high_resolution_clock::now();
+            double ms       = std::chrono::duration<double, std::milli>(end - start).count();
+
+            double error = std::abs(truePrice - lsmPrice);
+            prices.push_back(lsmPrice);
+            out << seed << "," << lsmPrice << "," << truePrice << "," << error << "," << ms << "\n";
+
+            std::cout << "Seed" << std::setw(15) << seed
+                      << " | Price: " << std::setw(10) << lsmPrice
+                      << " | Error: " << error
+                      << " | Time: " << ms << " ms" << std::endl;
+        }
+
+        double mean = 0.0;
+        for (double p : prices) mean += p;
+        mean /= prices.size();
+
+        double variance = 0.0;
+        for (double p : prices) variance += (p - mean) * (p - mean);
+        double stddev = std::sqrt(variance / prices.size());
+
+        out << "Mean,"   << mean   << ",,,\n";
+        out << "StdDev," << stddev << ",,,\n";
+        out.close();
+
+        std::cout << "Mean: " << mean << " | StdDev: " << stddev << std::endl;
+        std::cout << "Seed stability data written to " << filename << std::endl;
+    }
 
 
     } //namespace analysis

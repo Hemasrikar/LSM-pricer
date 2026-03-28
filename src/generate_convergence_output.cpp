@@ -7,8 +7,9 @@ void runAllConvergence(lsm::analysis::ConvergenceAnalyser& analyser, bool isLag,
 
     for (const std::string& mode : {"order", "pathCount", "numExerciseDates"}) {
         analyser.runConvergence(mode, isLag, isCall);
-        // analyser.runSeedStability(mode, isLag);
     }
+
+    analyser.runSeedStability(isLag, isCall);
 }
 
 int main(){
@@ -25,4 +26,3 @@ int main(){
 
     return 0;
 }
-

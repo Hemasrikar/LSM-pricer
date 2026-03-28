@@ -32,7 +32,7 @@ namespace lsm{
 
             void runConvergence(const std::string& mode, bool isLag, bool isCall);
 
-            void runSeedStability(const std::string& mode, bool isLag, bool isCall);
+            void runSeedStability(bool isLag, bool isCall);
         };
     } // namespace analysis
 
