@@ -22,22 +22,18 @@ namespace lsm{
 
             double getBSPrice();
 
-            double getFDPrice();
+            double getFDPrice(bool isCall);
 
             double getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag);
 
             // functions to run the convergence analysis
 
-            void runBenchmark();
+            void runBenchmark(bool isCall);
 
-            void runConvergence(const std::string& mode, bool isLag);
+            void runConvergence(const std::string& mode, bool isLag, bool isCall);
 
-            void runSeedStability(const std::string& mode, bool isLag);
+            void runSeedStability(const std::string& mode, bool isLag, bool isCall);
         };
     } // namespace analysis
 
 } // namespace lsm
-
-
-
-

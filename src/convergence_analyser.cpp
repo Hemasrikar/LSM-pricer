@@ -23,9 +23,9 @@ namespace lsm{
             return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, isCall);
         }
 
-        double ConvergenceAnalyser::getFDPrice() {
+        double ConvergenceAnalyser::getFDPrice(bool isCall) {
             // insert logic to get the fd prices
-            return 19.7; //placeholder
+            return isCall ? 10.45 : 6.08;
         }
 
         double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag) {
@@ -58,7 +58,7 @@ namespace lsm{
         }
 
     // Code to run a one off check against BS
-    void ConvergenceAnalyser::runBenchmark() {
+    void ConvergenceAnalyser::runBenchmark(bool isCall) {
         // set up the parameter vectors for the benchmark test
             std::vector<double> S0s   = {90.0, 100.0, 110.0};
             std::vector<double> sigmas = {0.2, 0.4};
@@ -83,7 +83,7 @@ namespace lsm{
 
                         // get the black scholes, fd and lsm prices
                         double bsPrice = getBSPrice();
-                        double fdPrice = getFDPrice();
+                        double fdPrice = getFDPrice(isCall);
                         double lsmPrice = getLSMPrice(24, 50, 3, 100000, true);
 
                         // compute the premium you pay for having early exercise
@@ -102,27 +102,28 @@ namespace lsm{
 
     }
 
-    void ConvergenceAnalyser::runConvergence(const std::string& mode, bool isLag) {
+    void ConvergenceAnalyser::runConvergence(const std::string& mode, bool isLag, bool isCall) {
         std::vector<int> list;
         std::string name;
         std::string filename;
 
         std::string basisLabel = isLag ? "laguerre" : "monomial";
+        std::string callLabel = isCall ? "call" : "put";
 
         if (mode == "pathCount"){
             list = {10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000};
             name = "Number of Paths";
-            filename = "csv_output/" + basisLabel + "_path_convergence.csv";
+            filename = "csv_output/" + callLabel + "_" + basisLabel + "_path_convergence.csv";
         }
         else if(mode == "order"){
             list = {1, 2, 3, 4, 5};
             name = "Order of Basis";
-            filename = "csv_output/" + basisLabel + "_order_convergence.csv";
+            filename = "csv_output/" + callLabel + "_" + basisLabel + "_order_convergence.csv";
         }
         else if (mode == "numExerciseDates"){
             list = {1, 5, 10, 20, 50, 100};
             name = "Number of Exercise Dates";
-            filename = "csv_output/" + basisLabel + "_exercise_dates_convergence.csv";
+            filename = "csv_output/" + callLabel + "_" + basisLabel + "_exercise_dates_convergence.csv";
         }
 
             // set up the parameters for the convergence test
@@ -131,7 +132,7 @@ namespace lsm{
             int order = 3;
             // bool call = true;
 
-            double truePrice = getFDPrice();
+            double truePrice = getFDPrice(isCall);
 
             std::ofstream out(filename);
             out << name << ",LSMPrice,TruePrice,Error,Time(ms)\n";
@@ -156,7 +157,7 @@ namespace lsm{
                 double ms = std::chrono::duration<double, std::milli>(end - start).count();
 
                 double error = std::abs(truePrice - lsmPrice);
-                out << i << "," << lsmPrice << "," << truePrice << "," << error << "\n";
+                out << i << "," << lsmPrice << "," << truePrice << "," << error <<  "," << ms << "\n";
 
                 std::cout << name << std::setw(15) << i 
                                 << " | Price: " << std::setw(10) << lsmPrice 

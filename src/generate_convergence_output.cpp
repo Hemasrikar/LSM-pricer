@@ -1,23 +1,27 @@
 #include <iostream>
 #include "convergence_analyser.hpp"
 
-void runAllConvergence(lsm::analysis::ConvergenceAnalyser& analyser, bool isLag) {
+void runAllConvergence(lsm::analysis::ConvergenceAnalyser& analyser, bool isLag, bool isCall) {
     std::string label = isLag ? "Laguerre" : "Monomial";
     std::cout << "\n--- CONVERGENCE REPORT (" << label << ") ---" << std::endl;
 
     for (const std::string& mode : {"order", "pathCount", "numExerciseDates"}) {
-        analyser.runConvergence(mode, isLag);
+        analyser.runConvergence(mode, isLag, isCall);
         // analyser.runSeedStability(mode, isLag);
     }
 }
 
 int main(){
-    lsm::analysis::ConvergenceAnalyser myAnalyser(100.0, 0.05, 0.2, 100.0, 1.0, true);
+    lsm::analysis::ConvergenceAnalyser callAnalyser(100.0, 0.05, 0.2, 100.0, 1.0, true);
+    lsm::analysis::ConvergenceAnalyser putAnalyser(100.0, 0.05, 0.2, 100.0, 1.0, false);
 
-    myAnalyser.runBenchmark();
+    putAnalyser.runBenchmark(false);
 
     for (bool isLag : {true, false})
-        runAllConvergence(myAnalyser, isLag);
+        runAllConvergence(callAnalyser, isLag, true);
+
+    for (bool isLag : {true, false})
+        runAllConvergence(putAnalyser, isLag, false);
 
     return 0;
 }
