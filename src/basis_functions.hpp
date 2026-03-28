@@ -44,8 +44,13 @@ namespace lsm{
         };
 
         // BasisSet holds a list of basis functions and provides two ways to fill it.
-        // use makeMonomialSet() for polynomial basis functions (1, x, x^2, x^3 and so on)
-        // use makeLaguerreSet() for Laguerre polynomial basis functions
+        
+        // makeLaguerreSet(n): builds {1, L0, L1, ..., L_{n-1}} — a constant intercept
+        //   plus n weighted Laguerre polynomials
+        //   Clears any existing basis before building. Throws if n < 1 or n > 5.
+
+        // makeMonomialSet(n): builds {1, x, x^2, ..., x^n} — a constant intercept
+        // plus monomials up to degree n. Clears any existing basis before building.
         // Owns its basis functions via unique_ptr.
         class BasisSet{
         public:
