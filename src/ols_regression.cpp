@@ -14,18 +14,14 @@ namespace lsm {
     namespace engine {
 
 // https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html#:~:text=typedef%20Matrix%3Cdouble%2C%20Dynamic%2C%20Dynamic%3E%20MatrixXd%3B
-Eigen::MatrixXd datapoints;
-
 // https://stackoverflow.com/questions/40852757/c-how-to-convert-stdvector-to-eigenmatrixxd
 
-// OLS regressors
-std::vector<double> ols_parameters;
 
 
 Eigen::MatrixXd buildDesignMatrix(
-    std::vector<double> S_t,
-    std::vector<bool> itm, // Boolean to know if it's in the money.
-    lsm::core::BasisSet& basis)
+    const std::vector<double>& S_t,
+    const std::vector<bool>& itm, // Boolean to know if it's in the money.
+    const lsm::core::BasisSet& basis)
 {
     int K = basis.basis.size();
     int n_itm = 0;
@@ -42,21 +38,21 @@ Eigen::MatrixXd buildDesignMatrix(
 }
 
 std::vector<bool> getITMVector(
-    std::vector<double> S_t,
-    lsm::core::OptionPayoff* payoff_function
+    const std::vector<double>& S_t,
+    const lsm::core::OptionPayoff& payoff_function
 )
 {
     std::vector<bool> itm(S_t.size());
     for (size_t i = 0; i < S_t.size(); ++i) {
-        itm[i] = payoff_function->InTheMoney(S_t[i]); // Use the OptionPayoff's InTheMoney method to determine ITM status
+        itm[i] = payoff_function.InTheMoney(S_t[i]); // Use the OptionPayoff's InTheMoney method to determine ITM status
     }
     return itm;
 };
 
 std::vector<double> buildYVector(
-    std::vector<double> cashflows, // Cashflows from t+1 (assume to be already updated by previous backward step)
-    std::vector<bool> itm,         // Boolean to know if it's in the money.
-    double discount_factor         // exp(-r * dt)
+    const std::vector<double>& cashflows, // Cashflows from t+1 (assume to be already updated by previous backward step)
+    const std::vector<bool>& itm,         // Boolean to know if it's in the money.
+    const double discount_factor         // exp(-r * dt)
 )
 {
     std::vector<double> y;
@@ -70,12 +66,12 @@ std::vector<double> buildYVector(
 
 
 std::vector<double> Ols_regression(
-    std::vector<std::vector<double>>& paths,
-    std::size_t t,
-    std::vector<double>& cashflows,
-    std::vector<bool>& itm,
+   const std::vector<std::vector<double>>& paths,
+    const std::size_t t,
+    const std::vector<double>& cashflows,
+    const std::vector<bool>& itm,
     double discount_factor,
-    lsm::core::BasisSet& basis)
+    const lsm::core::BasisSet& basis)
 {
     std::size_t N = paths.size();
     int K = basis.basis.size();

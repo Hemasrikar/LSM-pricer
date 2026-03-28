@@ -14,26 +14,26 @@ namespace lsm {
     namespace engine {
 
 Eigen::MatrixXd buildDesignMatrix(
-    std::vector<double> S_t,
-    std::vector<bool> itm,
-    lsm::core::BasisSet& basis);
+    const std::vector<double>& S_t,
+    const std::vector<bool>& itm,
+    const lsm::core::BasisSet& basis);
 
 std::vector<bool> getITMVector(
-    std::vector<double> S_t,
-    lsm::core::OptionPayoff* payoff_function);
+    const std::vector<double>& S_t,
+    const lsm::core::OptionPayoff& payoff_function);
 
 std::vector<double> buildYVector(
-    std::vector<double> cashflows,
-    std::vector<bool> itm,
+    const std::vector<double>& cashflows,
+    const std::vector<bool>& itm,
     double discount_factor);
 
 std::vector<double> Ols_regression(
-    std::vector<std::vector<double>>& paths,
+    const std::vector<std::vector<double>>& paths,
     std::size_t t,
-    std::vector<double>& cashflows,
-    std::vector<bool>& itm,
+    const std::vector<double>& cashflows,
+    const std::vector<bool>& itm,
     double discount_factor,
-    lsm::core::BasisSet& basis);
+    const lsm::core::BasisSet& basis);
 
     }
 }

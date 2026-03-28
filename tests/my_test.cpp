@@ -99,10 +99,10 @@ REQUIRE(paths[N-1][0] == S0);
 // double dt             = 1.0;
 // double discount_factor = std::exp(-r * dt); // 0.94176
 
-// // Use getITMVector with Put_payoff to build itm — this is how lsm_pricer will call it
-// Put_payoff put(1.10);
-// std::vector<double> S_t2 = {1.08, 1.26, 1.07, 0.97, 1.56, 0.77, 0.84, 1.22};
-// std::vector<bool> itm = getITMVector(S_t2, &put);
+// Use getITMVector with Put_payoff to build itm — this is how lsm_pricer will call it
+Put_payoff put(1.10);
+std::vector<double> S_t2 = {1.08, 1.26, 1.07, 0.97, 1.56, 0.77, 0.84, 1.22};
+std::vector<bool> itm = getITMVector(S_t2, put);
 
 // // Basis {1, X, X^2} i.e. monomial degree 2 gives 3 functions (paper uses constant + X + X^2)
 // lsm::core::BasisSet basis;
