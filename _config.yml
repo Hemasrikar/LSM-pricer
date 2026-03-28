@@ -3,4 +3,6 @@ description: This project implements the Longstaff-Schwartz Least Squares Monte 
 theme: minima
 kramdown:
   math_engine: mathjax
+  math_engine_opts:
+    preview: false
   syntax_highlighter: rouge
