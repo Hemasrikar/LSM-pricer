@@ -2,10 +2,7 @@
 #include "convergence_analyser.hpp"
 
 void runAllConvergence(lsm::analysis::ConvergenceAnalyser& analyser, bool isLag, bool isCall) {
-    std::string label = isLag ? "Laguerre" : "Monomial";
-    std::cout << "\n--- CONVERGENCE REPORT (" << label << ") ---" << std::endl;
-
-    for (const std::string& mode : {"order", "pathCount", "numExerciseDates"}) {
+    for (const std::string mode : {"order", "pathCount", "numExerciseDates"}) {
         analyser.runConvergence(mode, isLag, isCall);
     }
 
