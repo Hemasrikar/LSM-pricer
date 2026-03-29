@@ -9,5 +9,9 @@ plugins:
 search_enabled: true
 color_scheme: light
 
+aux_links: {}
+toc:
+  enabled: true
+  
 kramdown:
   syntax_highlighter: rouge

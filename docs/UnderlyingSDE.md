@@ -2,6 +2,7 @@
 title: Underlying SDE
 layout: default
 nav_order: 9
+has_toc: true
 ---
 
 **Namespace:** `lsm::core` | **Header:** `underlying_sde.hpp`
