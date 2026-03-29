@@ -2,7 +2,6 @@
 #include <cmath>
 #include <vector>
 #include <stdexcept>
-// For finding header files necessary used: https://libeigen.gitlab.io/eigen/docs-nightly/group__QuickRefPage.html
 #include <Eigen/Dense>
 #include "mc_paths.hpp"
 #include "lsm_pricer.hpp"
@@ -13,10 +12,7 @@
 namespace lsm {
     namespace engine {
 
-// https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html#:~:text=typedef%20Matrix%3Cdouble%2C%20Dynamic%2C%20Dynamic%3E%20MatrixXd%3B
 Eigen::MatrixXd datapoints;
-
-// https://stackoverflow.com/questions/40852757/c-how-to-convert-stdvector-to-eigenmatrixxd
 
 // OLS regressors
 std::vector<double> ols_parameters;
@@ -30,7 +26,7 @@ Eigen::MatrixXd buildDesignMatrix(
     int K = basis.basis.size();
     int n_itm = 0;
     for (bool b : itm) if (b) ++n_itm;
-    Eigen::MatrixXd X(n_itm, K); // https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html#:~:text=this%20page.-,Resizing
+    Eigen::MatrixXd X(n_itm, K);
     int row = 0;
     for (int i = 0; i < static_cast<int>(S_t.size()); ++i) {
         if (!itm[i]) continue;
@@ -90,13 +86,11 @@ std::vector<double> Ols_regression(
     std::vector<double> Y_vec = buildYVector(cashflows, itm, discount_factor);
     Eigen::VectorXd Y = Eigen::Map<Eigen::VectorXd>(Y_vec.data(), static_cast<int>(Y_vec.size()));
 
-    // https://libeigen.gitlab.io/eigen/docs-3.3/group__LeastSquares.html#:~:text=and%20decompositions%20.-,Using%20the%20QR%20decomposition,-The%20solve()%20method
     Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);  // Solve OLS via QR decomposition: beta = (X'X)^{-1} X'Y
 
     std::vector<double> result(beta.data(), beta.data() + K);
     return result;
 }
-// Potential discussion on code performance: https://scicomp.stackexchange.com/questions/3159/is-it-a-good-idea-to-use-vectorvectordouble-to-form-a-matrix-class-for-high
 
     }
 }
