@@ -274,5 +274,27 @@ namespace lsm {
         return computeOptionValue(pv, europeanValue, N, T);
     }
     
+    std::pair<lsm::engine::SimulationResult, lsm::engine::PathData> LSMPricer::priceWithData(double S0) {
+        // simulate paths
+        PathData data = simulatePaths(S0);
+        const int N = data.numPaths;
+        const int T = data.numTimeSteps;
+
+        // european benchmark - mean discounted terminal payoff
+        const double totalDisc = std::exp(-config.riskFreeRate * config.maturity);
+        double euSum = 0.0;
+        for (int i = 0; i < N; ++i)
+            euSum += payoff -> payoff(data.paths[i][T]);
+        const double europeanValue = (euSum / N) * totalDisc;
+
+        // backward induction returns per path PV at time 0
+        std::vector<double> pv = backwardInduction(data);
+
+        // compute statistics
+        SimulationResult result = computeOptionValue(pv, europeanValue, N, T);
+        
+        return std::make_pair(result, data);
+    }
+    
     } // namespace engine
 } // namespace lsm
