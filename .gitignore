@@ -9,3 +9,4 @@ tests/IO/*
 !/csv_output/.gitkeep
 /analysis/*.png
 !/analysis/*.py
+plots/
