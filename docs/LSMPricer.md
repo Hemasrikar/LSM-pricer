@@ -121,7 +121,7 @@ The return value is a `SimulationResult` object containing:
 - the early-exercise premium,
 - and the run metadata.
 
-See: [LSMPricer: Price](/docs/LSMPricer: Price.md)
+See: [LSMPricer: Price](./LSMPricer_Price.md)
 
 ---
 
@@ -137,7 +137,7 @@ See: [LSMPricer Price](./LSMPricer_Price.md)
 
 The method `simulatePaths(double S0)` generates Monte Carlo sample paths using the stored stochastic process and configuration.
 
-See: [LSMPRicer: SimulatPaths](./LSMPRicer_SimulatPaths.md)
+See: [LSMPRicer SimulatPaths](./LSMPRicer_SimulatPaths.md)
 
 ### 3. Backward Induction
 
