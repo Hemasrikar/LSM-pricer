@@ -1,4 +1,7 @@
-# Basis Function
+---
+title: Basis Function
+nav: true
+---
 
 **Namespace:** `lsm::core` | **Header:** `basis_functions.hpp`
 

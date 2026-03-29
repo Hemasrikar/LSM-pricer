@@ -1,4 +1,7 @@
-# Underlying SDEs
+---
+title: Underlying SDE
+nav: true
+---
 
 **Namespace:** `lsm::core` | **Header:** `underlying_sde.hpp`
 
