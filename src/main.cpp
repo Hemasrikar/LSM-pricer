@@ -159,6 +159,18 @@ void export_csv(const lsm::engine::PathData& d, const lsm::engine::SimulationRes
         }
     }
 
+    {
+        auto f = utils::open_file("price_summary.csv");
+        f << "label,value\n"
+          << "american," << res.optionValue << "\n"
+          << "european," << res.europeanValue << "\n"
+          << "early_exercise_premium," << res.earlyExercisePremium << "\n"
+          << "std_error," << res.standardError << "\n"
+          << "num_paths," << res.numPaths << "\n"
+          << "num_exercise_dates," << res.numExerciseDates << "\n";
+    }
+
+
 }
 
 // Main
