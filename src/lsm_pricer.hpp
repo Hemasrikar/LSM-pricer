@@ -54,6 +54,8 @@ namespace lsm {
                 const lsm::engine::LSMConfig& config);
             
                 lsm::engine::SimulationResult price(double S0);
+                
+                std::pair<lsm::engine::SimulationResult, lsm::engine::PathData> priceWithData(double S0);
         private:
             std::unique_ptr<const lsm::core::StochasticProcess> process;
             std::unique_ptr<const lsm::core::OptionPayoff>      payoff;

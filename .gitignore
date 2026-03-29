@@ -7,3 +7,6 @@ tests/IO/*
 .DS_Store
 /csv_output/*
 !/csv_output/.gitkeep
+/analysis/*.png
+!/analysis/*.py
+plots/

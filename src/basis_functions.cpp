@@ -64,13 +64,24 @@ namespace lsm {
             return ptrs;
         }
 
+        // Builds {1, L0, L1, ..., L_{numTerms-1}}
+        // a constant and the first three Laguerre polynomials
+        // numTerms is the number of Laguerre terms, not counting the constant intercept.
         void BasisSet::makeLaguerreSet(int numTerms) {
+            if (numTerms < 1 || numTerms > 5)
+                throw std::invalid_argument("makeLaguerreSet: numTerms must be 1 to 5");
+            basis.clear();
             basis.push_back(std::make_unique<ConstantBasis>());
             for (int i = 0; i < numTerms; ++i)
                 basis.push_back(std::make_unique<LaguerrePolynomial>(i));
         }
 
+        // Builds {1, x, x^2, ..., x^numTerms} matching simple polynomial basis.
+        // numTerms is the highest power included (not counting the constant intercept).
         void BasisSet::makeMonomialSet(int numTerms) {
+            if (numTerms < 1)
+                throw std::invalid_argument("makeMonomialSet: numTerms must be at least 1");
+            basis.clear();
             basis.push_back(std::make_unique<ConstantBasis>());
             for (int i = 1; i <= numTerms; ++i)
                 basis.push_back(std::make_unique<MonomialBasis>(i));
