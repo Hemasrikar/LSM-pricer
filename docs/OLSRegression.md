@@ -50,10 +50,10 @@ The solver lives in `Ols_regression()` in `src/ols_regression.cpp` (namespace `l
 
 | Step | Function | Description |
 |------|----------|-------------|
-| 1 | `buildDesignMatrix` | Evaluates each basis function on $S_t$ for ITM paths only → $X$ |
-| 2 | `buildYVector` | Discounts next-period cashflows by $e^{-r\Delta t}$ for ITM paths → $Y$ |
-| 3 | `Ols_regression` | Solves $X\hat{\beta} = Y$ via `colPivHouseholderQr().solve(Y)` |
-| 4 | — | OTM paths receive $\hat{C}_i = 0$ (no extrapolation outside ITM set) |
+| 1 | `buildDesignMatrix` | Evaluates each basis function on \( S_t \) for ITM paths only &rarr; \( X \) |
+| 2 | `buildYVector` | Discounts next-period cashflows by \( e^{-r\Delta t} \) for ITM paths &rarr; \( Y \) |
+| 3 | `Ols_regression` | Solves \( X\hat{\beta} = Y \) via `colPivHouseholderQr().solve(Y)` |
+| 4 | — | OTM paths receive \( \hat{C}_i = 0 \) (no extrapolation outside ITM set) |
 ```cpp
 // src/ols_regression.cpp (line 94)
 Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);
