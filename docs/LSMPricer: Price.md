@@ -4,7 +4,6 @@ layout: default
 parent: LSM Pricer
 nav_order: 4
 has_toc: true
-has_children: true
 ---
 
 **Namespace:** `lsm::engine` | **Header:** `lsm_pricer.hpp`
