@@ -178,15 +178,17 @@ namespace lsm {
         }
 
         //Run Regression to estimate continuation coeffs
+        const double strike = payoff->strike();
         std::vector<double> coeffs = lsm::engine::Ols_regression(
-                data.paths, 
+                data.paths,
                 static_cast<std::size_t>(t),
-                cashflow, 
-                itm, 
-                discountFactor, 
-                *basis
+                cashflow,
+                itm,
+                discountFactor,
+                *basis,
+                strike
             );
-        
+
         //compare execise value with continuation value
         for (int i = 0; i < numPaths; ++i){
             if(!itm[i]){
@@ -194,15 +196,7 @@ namespace lsm {
             }
             double St = data.paths[i][t];
             double exerciseValue = payoff->payoff(St);
-
-            //continuation value = fitted regression at S_t
-            if (coeffs.size() > basis->basis.size()){
-                throw std::runtime_error("Regression returned more coefficients than available basis functions");
-            }
-            double continuationValue = 0.0;
-            for (std::size_t j = 0; j < coeffs.size(); ++j){
-                continuationValue += coeffs[j] * basis->basis[j]->evaluate(St);
-            }
+            double continuationValue = coeffs[i];
             if (exerciseValue > continuationValue){
                 cashflow[i] = exerciseValue;
                 exerciseTime[i] = t;

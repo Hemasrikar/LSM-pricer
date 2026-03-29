@@ -26,7 +26,7 @@ std::vector<bool> itm = {false, true, true, true, false};
 lsm::core::BasisSet basis;
 basis.makeMonomialSet(3);
 
-Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis);
+Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis, 100.0);
 
 std::cout << "Design Matrix X: \n" << X << std::endl;
 
@@ -42,7 +42,7 @@ std::vector<bool> itm = {false, true, true, true, false};
 lsm::core::BasisSet basis;
 basis.makeLaguerreSet(3);
 
-Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis);
+Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis, 100.0);
 
 std::cout << "Design Matrix X:\n" << X << std::endl;
 
@@ -108,7 +108,7 @@ std::vector<bool> itm = getITMVector(S_t2, put);
 // lsm::core::BasisSet basis;
 // basis.makeMonomialSet(2);
 
-// std::vector<double> C_hat = Ols_regression(paths, 2, cashflows, itm, discount_factor, basis);
+std::vector<double> C_hat = Ols_regression(paths, 2, cashflows, itm, discount_factor, basis, 1.10);
 
 // std::cout << "C_hat: ";
 // for (double v : C_hat) std::cout << v << " ";
