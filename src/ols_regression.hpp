@@ -16,7 +16,8 @@ namespace lsm {
 Eigen::MatrixXd buildDesignMatrix(
     const std::vector<double>& S_t,
     const std::vector<bool>& itm,
-    const lsm::core::BasisSet& basis);
+    const lsm::core::BasisSet& basis,
+    double strike);
 
 std::vector<bool> getITMVector(
     const std::vector<double>& S_t,
@@ -33,7 +34,8 @@ std::vector<double> Ols_regression(
     const std::vector<double>& cashflows,
     const std::vector<bool>& itm,
     double discount_factor,
-    const lsm::core::BasisSet& basis);
+    const lsm::core::BasisSet& basis,
+    double strike);
 
     }
 }

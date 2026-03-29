@@ -21,7 +21,8 @@ namespace lsm {
 Eigen::MatrixXd buildDesignMatrix(
     const std::vector<double>& S_t,
     const std::vector<bool>& itm, // Boolean to know if it's in the money.
-    const lsm::core::BasisSet& basis)
+    const lsm::core::BasisSet& basis,
+    double strike)
 {
     int K = basis.basis.size();
     int n_itm = 0;
@@ -31,7 +32,7 @@ Eigen::MatrixXd buildDesignMatrix(
     for (int i = 0; i < static_cast<int>(S_t.size()); ++i) {
         if (!itm[i]) continue;
         for (int k = 0; k < K; ++k)
-            X(row, k) = basis.basis[k]->evaluate(S_t[i]);
+            X(row, k) = basis.basis[k]->evaluate(S_t[i] / strike);
         ++row;
     }
     return X;
@@ -71,7 +72,8 @@ std::vector<double> Ols_regression(
     const std::vector<double>& cashflows,
     const std::vector<bool>& itm,
     double discount_factor,
-    const lsm::core::BasisSet& basis)
+    const lsm::core::BasisSet& basis,
+    double strike)
 {
     std::size_t N = paths.size();
     int K = basis.basis.size();
@@ -82,15 +84,22 @@ std::vector<double> Ols_regression(
         S_t[i] = paths[i][t];
 
     // Build design matrix X (ITM paths only) and discounted Y vector
-    Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis);
+    Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis, strike);
     std::vector<double> Y_vec = buildYVector(cashflows, itm, discount_factor);
     Eigen::VectorXd Y = Eigen::Map<Eigen::VectorXd>(Y_vec.data(), static_cast<int>(Y_vec.size()));
 
     // https://libeigen.gitlab.io/eigen/docs-3.3/group__LeastSquares.html#:~:text=and%20decompositions%20.-,Using%20the%20QR%20decomposition,-The%20solve()%20method
     Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);  // Solve OLS via QR decomposition: beta = (X'X)^{-1} X'Y
 
-    std::vector<double> result(beta.data(), beta.data() + K);
-    return result;
+    std::vector<double> C_hat(N, 0.0);
+    for (std::size_t i = 0; i < N; ++i) {
+        if (!itm[i]) continue;
+        double val = 0.0;
+        for (int k = 0; k < K; ++k)
+            val += beta[k] * basis.basis[k]->evaluate(S_t[i] / strike);
+        C_hat[i] = val;
+    }
+    return C_hat;
 }
 // Potential discussion on code performance: https://scicomp.stackexchange.com/questions/3159/is-it-a-good-idea-to-use-vectorvectordouble-to-form-a-matrix-class-for-high
 
