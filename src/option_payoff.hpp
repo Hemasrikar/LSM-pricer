@@ -14,6 +14,7 @@ namespace lsm {
             OptionPayoff(double strike);
             virtual ~OptionPayoff() = default;
 
+            double strike() const { return K; }
             virtual double payoff(double S) const = 0;
             virtual bool InTheMoney(double S) const = 0;
         };
