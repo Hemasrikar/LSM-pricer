@@ -14,6 +14,7 @@
 #include "basis_functions.hpp"
 #include "lsm_pricer.hpp"
 #include "ols_regression.hpp"
+#include <Eigen/Dense>
 
 
 // Configuration
@@ -147,14 +148,21 @@ void export_csv(const lsm::engine::PathData& d, const lsm::engine::SimulationRes
         
         lsm::core::BasisSet basis;
         basis.makeLaguerreSet(cfg::basis_order);
-        
-        auto coeff = lsm::engine::Ols_regression(
-            const_cast<std::vector<std::vector<double>>&>(d.paths),
-            ns - 1, cf_vec, itm_mask, df, basis);
-        
+
+        // Compute beta (regression coefficients, size K) directly so that
+        // eval_basis can evaluate the fitted continuation curve on a grid.
+        // we solve the least-squares system here using the same helpers.
+        Eigen::MatrixXd X = lsm::engine::buildDesignMatrix(
+            [&]{ std::vector<double> s(np); for(int i=0;i<np;++i) s[i]=d.paths[i][ns-1]; return s; }(),
+            itm_mask, basis, strike);
+        std::vector<double> y_vec = lsm::engine::buildYVector(cf_vec, itm_mask, df);
+        Eigen::VectorXd Y = Eigen::Map<Eigen::VectorXd>(y_vec.data(), static_cast<int>(y_vec.size()));
+        Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);
+        std::vector<double> coeff(beta.data(), beta.data() + beta.size());
+
         for (int g = 0; g <= cfg::grid_points; ++g) {
             double x = xmin + (xmax - xmin) * g / cfg::grid_points;
-            f << x << "," << utils::eval_basis(coeff, basis, x) 
+            f << x << "," << utils::eval_basis(coeff, basis, x / strike)
               << "," << std::max(strike - x, 0.0) << "\n";
         }
     }
@@ -214,7 +222,7 @@ int main() {
         return EXIT_SUCCESS;
 
     } catch (const std::exception& e) {
-        std::cerr << "Error" << e.what() << "\n";
+        std::cerr << "Error: " << e.what() << "\n";
         return EXIT_FAILURE;
     }
 }
