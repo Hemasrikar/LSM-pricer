@@ -131,25 +131,25 @@ See: [LSMPricer: Price](/docs/LSMPricer: Price.md)
 
 The method `price(double S0)` is the public entry point of the pricing engine. It coordinates the full Longstaff–Schwartz valuation pipeline.
 
-See: [LSMPricer Price](docs/LSMPricer_Price.md)
+See: [LSMPricer Price](./LSMPricer_Price.md)
 
 ### 2. Path Simulation
 
 The method `simulatePaths(double S0)` generates Monte Carlo sample paths using the stored stochastic process and configuration.
 
-See: [LSMPRicer: SimulatPaths](docs/LSMPRicer_SimulatPaths.md)
+See: [LSMPRicer: SimulatPaths](./LSMPRicer_SimulatPaths.md)
 
 ### 3. Backward Induction
 
 The method `backwardInduction(PathData& data)` implements the Longstaff–Schwartz regression-based optimal stopping procedure.
 
-See: [LSMPricer BackwardInduction](docs/LSMPricer_BackwardInduction.md)
+See: [LSMPricer Backward Induction](./LSMPricer_BackwardInduction.md)
 
 ### 4. Price Aggregation
 
 The method `computeOptionValue(...)` converts discounted pathwise realised cashflows into the final pricing summary.
 
-See: [LSMPricer Optionvalue](docs/LSMPricer_Optionvalue.md)
+See: [LSMPricer Option value](./LSMPricer_Optionvalue.md)
 
 ---
 
@@ -161,7 +161,7 @@ The class relies on the following supporting structures:
 - `PathData`
 - `SimulationResult`
 
-See: [LSMPricer DataStructures](docs/LSMPricer_data_structures.md)
+See: [LSMPricer Data Structures](./LSMPricer_data_structures.md)
 
 ---
 
