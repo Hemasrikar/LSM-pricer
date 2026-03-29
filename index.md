@@ -1,6 +1,7 @@
 ---
-layout: home
 title: LSM American Option Pricer
+layout: default
+nav_order: 1
 ---
 
 

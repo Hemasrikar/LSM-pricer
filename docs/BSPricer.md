@@ -1,4 +1,5 @@
 ---
 title: Black-Scholes Pricer
-nav: true
+layout: default
+nav_order: 3
 ---

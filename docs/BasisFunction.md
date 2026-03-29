@@ -1,6 +1,7 @@
 ---
 title: Basis Function
-nav: true
+layout: default
+nav_order: 2
 ---
 
 **Namespace:** `lsm::core` | **Header:** `basis_functions.hpp`

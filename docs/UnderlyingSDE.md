@@ -1,6 +1,7 @@
 ---
 title: Underlying SDE
-nav: true
+layout: default
+nav_order: 9
 ---
 
 **Namespace:** `lsm::core` | **Header:** `underlying_sde.hpp`

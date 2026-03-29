@@ -1,6 +1,7 @@
 ---
 title: OLS Regression
-nav: true
+layout: default
+nav_order: 7
 ---
 
 OLS regression follows simple OLS logic where we have our design matrix $X \in \mathbb{R}^{n \times m}$ (for $n$ ITM observations and $m$ basis functions), a target vector $Y$ (discounted continuation values), and our OLS estimate:
