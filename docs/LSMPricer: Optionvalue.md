@@ -1,5 +1,5 @@
 ---
-title: LSM Pricer: Compute Option Value
+title: "LSM Pricer: Compute Option Value"
 layout: default
 parent: LSM Pricer
 nav_order: 3

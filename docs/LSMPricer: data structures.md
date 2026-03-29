@@ -1,5 +1,5 @@
 ---
-title: LSM Pricer: Data Structures
+title: "LSM Pricer: Data Structures"
 layout: default
 parent: LSM Pricer
 nav_order: 5

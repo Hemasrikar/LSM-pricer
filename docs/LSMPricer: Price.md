@@ -1,5 +1,5 @@
 ---
-title: LSM Pricer: Price
+title: "LSM Pricer: Price"
 layout: default
 parent: LSM Pricer
 nav_order: 4

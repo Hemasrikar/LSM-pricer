@@ -1,5 +1,5 @@
 ---
-title: LSM Pricer: Simulate Paths
+title: "LSM Pricer: Simulate Paths"
 layout: default
 parent: LSM Pricer
 nav_order: 1

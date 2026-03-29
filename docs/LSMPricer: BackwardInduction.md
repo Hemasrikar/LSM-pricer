@@ -1,5 +1,5 @@
 ---
-title: LSM Pricer: Backward Induction
+title: "LSM Pricer: Backward Induction"
 layout: default
 parent: LSM Pricer
 nav_order: 2
