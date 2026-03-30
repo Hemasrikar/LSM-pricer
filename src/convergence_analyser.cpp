@@ -34,8 +34,6 @@ namespace lsm{
                 lsm::core::Put_payoff payoff(K);
                 return lsm::fd::FDPricer(gbm, payoff).price(S0, T);
             }
-            // insert logic to get the fd prices
-            return isCall ? 10.45 : 6.08;
         }
 
         double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag) {
