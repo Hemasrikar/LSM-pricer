@@ -10,8 +10,8 @@ void runAllConvergence(lsm::analysis::ConvergenceAnalyser& analyser, bool isLag,
 }
 
 int main(){
-    lsm::analysis::ConvergenceAnalyser callAnalyser(100.0, 0.05, 0.2, 100.0, 1.0, true);
-    lsm::analysis::ConvergenceAnalyser putAnalyser(100.0, 0.05, 0.2, 100.0, 1.0, false);
+    lsm::analysis::ConvergenceAnalyser callAnalyser(36, 0.06, 0.2, 40, 1.0, true);
+    lsm::analysis::ConvergenceAnalyser putAnalyser(36, 0.06, 0.2, 40, 1.0, false);
 
     putAnalyser.runBenchmark(false);
 
