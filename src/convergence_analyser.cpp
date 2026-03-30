@@ -1,5 +1,6 @@
 #include "convergence_analyser.hpp"
 #include "bs_pricer.hpp"
+#include "Finite_Difference.hpp"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -25,8 +26,14 @@ namespace lsm{
         }
 
         double ConvergenceAnalyser::getFDPrice(bool isCall) {
-            // insert logic to get the fd prices
-            return isCall ? 10.45 : 6.08;
+            lsm::core::GeometricBrownianMotion gbm(r, sigma);
+            if (isCall) {
+                lsm::core::Call_payoff payoff(K);
+                return lsm::fd::FDPricer(gbm, payoff).price(S0, T);
+            } else {
+                lsm::core::Put_payoff payoff(K);
+                return lsm::fd::FDPricer(gbm, payoff).price(S0, T);
+            }
         }
 
         double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag) {
