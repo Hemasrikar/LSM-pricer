@@ -1,6 +1,6 @@
 #include <cmath>
 #include <algorithm>
-#include "Finite_Difference.hpp"
+#include "finite_difference.hpp"
 
 namespace lsm {
 namespace fd {

@@ -1,6 +1,6 @@
 #include "convergence_analyser.hpp"
 #include "bs_pricer.hpp"
-#include "Finite_Difference.hpp"
+#include "finite_difference.hpp"
 #include <vector>
 #include <string>
 #include <iostream>

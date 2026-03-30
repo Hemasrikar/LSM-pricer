@@ -20,8 +20,7 @@ set(SRC_FILES
     ${CMAKE_SOURCE_DIR}/src/option_payoff.cpp
     ${CMAKE_SOURCE_DIR}/src/underlying_sde.cpp
     ${CMAKE_SOURCE_DIR}/src/bs_pricer.cpp
-    ${CMAKE_SOURCE_DIR}/src/Finite_Difference.cpp
-
+    ${CMAKE_SOURCE_DIR}/src/finite_difference.cpp
 )
 
 add_executable(my_program ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)
