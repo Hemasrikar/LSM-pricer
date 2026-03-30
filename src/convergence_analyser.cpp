@@ -26,7 +26,6 @@ namespace lsm{
         }
 
         double ConvergenceAnalyser::getFDPrice(bool isCall) {
-<<<<<<< HEAD
             lsm::core::GeometricBrownianMotion gbm(r, sigma);
             if (isCall) {
                 lsm::core::Call_payoff payoff(K);
@@ -35,10 +34,6 @@ namespace lsm{
                 lsm::core::Put_payoff payoff(K);
                 return lsm::fd::FDPricer(gbm, payoff).price(S0, T);
             }
-=======
-            // insert logic to get the fd prices
-            return isCall ? 2.18 : 4.478;
->>>>>>> fdc27f7 (fixed state migration issue)
         }
 
         double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag) {
