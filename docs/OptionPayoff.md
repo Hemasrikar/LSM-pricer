@@ -4,8 +4,8 @@ layout: default
 nav_order: 8
 has_toc: true
 ---
+**Namespace:** `lsm::core` | **Header:** `option_payoff.hpp`
 
-## Overview
 The **Option Payoff Module** provides an object-oriented structure for calculating the intrinsic value of a standard options. It is designed to integrate into pricing frameworks such as **Least Squares Monte Carlo (LSM)**, where payoff evaluation must be performed repeatedly across many simulated asset price paths and time steps.
 
 This module supports:
@@ -98,4 +98,10 @@ public:
     virtual bool InTheMoney(double S) const = 0;
 };
 ```
+
+### Additional Information
+```cpp
+double strike() const { return K; }
+```
+This line of code above returns the strike price `K` from the payoff functions. By returning the strike price `K`, this allows to be implemented in the `ols_regression` and `lsm_pricer` to normalise the underlying asset price as well as the payoff functions.
 
