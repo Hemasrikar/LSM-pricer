@@ -1,7 +1,7 @@
 ---
 title: Tests of the Project
 layout: default
-nav_order: 9
+nav_order: 7
 has_toc: true
 ---
 
