@@ -20,3 +20,12 @@ struct LSMConfig {
     double   riskFreeRate = 0.06;    // continuously compounded risk-free rate
     unsigned rngSeed = 24;  // seed value
 };
+```
+
+## Architecture
+
+Three layers:
+
+- **`lsm::core`** - stochastic processes, payoffs, basis functions, RNG
+- **`lsm::engine`** - LSM algorithm: path simulation, backward induction, OLS regression
+- **`lsm::analysis`** - convergence studies and benchmarking via `ConvergenceAnalyser`
