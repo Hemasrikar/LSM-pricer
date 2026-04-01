@@ -1,3 +1,11 @@
+---
+title: Basis Function
+layout: default
+nav_order: 2
+has_toc: true
+---
+
+
 **Namespace:** `lsm::core` | **Header:** `basis_functions.hpp`
 
 A small set of basis function classes for least-squares regression, primarily targeting the Longstaff-Schwartz Monte Carlo method for American option pricing.
