@@ -18,15 +18,16 @@ namespace lsm {
             const lsm::core::BasisSet& basis,
             double strike)
         {
-            int K = basis.basis.size();
+            auto K = basis.size();
             int n_itm = 0;
             for (bool b : itm) if (b) ++n_itm;
             Eigen::MatrixXd X(n_itm, K); 
+            auto ptrs = basis.basisPtrs();
             int row = 0;
-            for (int i = 0; i < static_cast<int>(S_t.size()); ++i) {
+            for (size_t i = 0; i < S_t.size(); ++i) {
                 if (!itm[i]) continue;
-                for (int k = 0; k < K; ++k)
-                    X(row, k) = basis.basis[k]->evaluate(S_t[i] / strike);
+                for (size_t k = 0; k < K; ++k)
+                    X(row, k) = ptrs[k]->evaluate(S_t[i] / strike);
                 ++row;
             }
             return X;
@@ -51,7 +52,7 @@ namespace lsm {
         )
         {
             std::vector<double> y;
-            for (int i = 0; i < static_cast<int>(itm.size()); ++i) {
+            for (size_t i = 0; i < itm.size(); ++i) {
                 if (itm[i]) {
                     y.push_back(cashflows[i] * discount_factor);
                 }
@@ -69,31 +70,32 @@ namespace lsm {
             const lsm::core::BasisSet& basis,
             double strike)
         {
-            std::size_t N = paths.size();
-            int K = basis.basis.size();
+            auto N = paths.size();
+            auto K = basis.size();
 
             // Extract stock prices at time t across all paths
             std::vector<double> S_t(N);
-            for (std::size_t i = 0; i < N; ++i)
+            for (size_t i = 0; i < N; ++i)
                 S_t[i] = paths[i][t];
 
             // Build design matrix X (ITM paths only) and discounted Y vector
             Eigen::MatrixXd X = buildDesignMatrix(S_t, itm, basis, strike);
             std::vector<double> Y_vec = buildYVector(cashflows, itm, discount_factor);
-            Eigen::VectorXd Y = Eigen::Map<Eigen::VectorXd>(Y_vec.data(), static_cast<int>(Y_vec.size()));
+            Eigen::VectorXd Y = Eigen::Map<Eigen::VectorXd>(Y_vec.data(), Y_vec.size());
 
             Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);  // Solve OLS via QR decomposition: beta = (X'X)^{-1} X'Y
 
+            auto ptrs = basis.basisPtrs();
             std::vector<double> C_hat(N, 0.0);
-            for (std::size_t i = 0; i < N; ++i) {
+            for (size_t i = 0; i < N; ++i) {
                 if (!itm[i]) continue;
                 double val = 0.0;
-                for (int k = 0; k < K; ++k)
-                    val += beta[k] * basis.basis[k]->evaluate(S_t[i] / strike);
+                for (size_t k = 0; k < K; ++k)
+                    val += beta[k] * ptrs[k]->evaluate(S_t[i] / strike);
                 C_hat[i] = val;
             }
             return C_hat;
-    }
+        }
 
-    }
-}
+    } // namespace engine
+} // namespace lsm

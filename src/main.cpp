@@ -44,8 +44,9 @@ namespace cfg {
 namespace utils {
     double eval_basis(const std::vector<double>& c, const lsm::core::BasisSet& b, double x) {
         double v = 0.0;
+        auto ptrs = b.basisPtrs();
         for (std::size_t i = 0; i < c.size(); ++i)
-            v += c[i] * b.basis[i]->evaluate(x);
+            v += c[i] * ptrs[i]->evaluate(x);
         return v;
     }
 
