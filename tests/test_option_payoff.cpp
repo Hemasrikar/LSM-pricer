@@ -3,7 +3,7 @@
 #include "option_payoff.hpp"
 #include <cmath>
 
-
+using namespace lsm::core;
 
 // Put Payoff Test Case
 
