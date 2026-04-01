@@ -14,3 +14,8 @@ add_executable(test_convergence_analyser ${SRC_FILES} test_convergence_analyser.
 target_include_directories(test_convergence_analyser PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(test_convergence_analyser PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
 add_test(NAME test_convergence_analyser COMMAND test_convergence_analyser)
+
+add_executable(finite_difference_tests ${SRC_FILES} finite_difference_tests.cpp)
+target_include_directories(finite_difference_tests PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(finite_difference_tests PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
+add_test(NAME finite_difference_tests COMMAND finite_difference_tests)
