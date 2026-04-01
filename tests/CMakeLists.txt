@@ -19,3 +19,13 @@ add_executable(finite_difference_tests ${SRC_FILES} finite_difference_tests.cpp)
 target_include_directories(finite_difference_tests PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(finite_difference_tests PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
 add_test(NAME finite_difference_tests COMMAND finite_difference_tests)
+
+add_executable(test_lsm_pricer ${SRC_FILES} test_lsm_pricer.cpp)
+target_include_directories(test_lsm_pricer PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(test_lsm_pricer PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
+add_test(NAME test_lsm_pricer COMMAND test_lsm_pricer)
+
+add_executable(test_underlying_sde ${SRC_FILES} test_underlying_sde.cpp)
+target_include_directories(test_underlying_sde PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(test_underlying_sde PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
+add_test(NAME test_underlying_sde COMMAND test_underlying_sde)
