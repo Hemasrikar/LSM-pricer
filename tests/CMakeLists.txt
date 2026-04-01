@@ -14,3 +14,9 @@ add_executable(test_convergence_analyser ${SRC_FILES} test_convergence_analyser.
 target_include_directories(test_convergence_analyser PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(test_convergence_analyser PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
 add_test(NAME test_convergence_analyser COMMAND test_convergence_analyser)
+
+# Tests for Option Payoff Function and ITM
+add_executable(OptionPayoff_test ${SRC_FILES} test_option_payoff.cpp)
+target_include_directories(OptionPayoff_test PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
+add_test(NAME OptionPayoff_test COMMAND OptionPayoff_test)
+target_include_directories(OptionPayoff_test PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
