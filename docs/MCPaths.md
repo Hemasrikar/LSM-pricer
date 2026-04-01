@@ -1,6 +1,7 @@
 ---
 title: MC Paths
 layout: default
-nav_order: 6
+parent: OLS Regression
+nav_order: 1
 has_toc: true
 ---

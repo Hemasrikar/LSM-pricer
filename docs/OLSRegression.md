@@ -2,7 +2,7 @@
 title: OLS Regression
 layout: default
 nav_order: 7
-has_toc: true
+has_children: true
 ---
 
 OLS regression follows simple OLS logic where we have our design matrix $X \in \mathbb{R}^{n \times m}$ (for $n$ ITM observations and $m$ basis functions), a target vector $Y$ containing the discounted continuation values for each ITM path, and our OLS estimate:
