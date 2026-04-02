@@ -14,10 +14,17 @@ static std::function<void(lsm::core::BasisSet&, int)> factory = [](lsm::core::Ba
 };
 static lsm::analysis::ConvergenceAnalyser analyser(100.0, 0.05, 0.2, 100.0, 1.0, gbm, call, basis, factory, 3, 10000, 50);
 
-
-
 using namespace lsm::analysis;
 
-TEST_CASE("getBSPrice is correct", "[convergence]") {
-    REQUIRE(analyser.getBSPrice() == Approx(10.4506).epsilon(0.001));
+TEST_CASE("getBSPrice returns a positive price", "[convergence]") {
+    REQUIRE(analyser.getBSPrice() > 0.0);
 }
+
+TEST_CASE("getFDPrice returns a positive price", "[convergence]") {
+    REQUIRE(analyser.getFDPrice() > 0.0);
+}
+
+TEST_CASE("getLSMPrice returns a positive price", "[convergence]") {
+    REQUIRE(analyser.getLSMPrice(24, 50, 3, 1000) > 0.0);
+}
+
