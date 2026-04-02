@@ -15,6 +15,8 @@ namespace lsm{
             std::string sdeType, payoffType, basisType;
             int order, fixedPathCount, fixedNumDates;
 
+            std::string paramString() const;
+
         // defines the functions which can be accessed outside of the class
         public:
             ConvergenceAnalyser(double s, double r, double sigma, double K, double T, std::string sde, std::string payoff, std::string basis, int order, int fixedPathCount, int fixedNumDates);
