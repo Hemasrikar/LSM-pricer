@@ -21,8 +21,6 @@ struct LSMConfig {
     unsigned rngSeed = 24;  // seed value
 };
 <<<<<<< HEAD
-
-> Why we chose Unicorn as a team name: Unicorn was a memorable mascot for our team project, while also being quick and easy to type in command terminals. The term is also used in the tech industry to denote fast-growing startups valued at over US$1 billion, a testament to the naive ambition and enthusiasm with which we began the project.
 =======
 ```
 
@@ -34,3 +32,5 @@ Three layers:
 - **`lsm::engine`** - LSM algorithm: path simulation, backward induction, OLS regression
 - **`lsm::analysis`** - convergence studies and benchmarking via `ConvergenceAnalyser`
 >>>>>>> main
+
+> Why we chose Unicorn as a team name: Unicorn was a memorable mascot for our team project, while also being quick and easy to type in command terminals. The term is also used in the tech industry to denote fast-growing startups valued at over US$1 billion, a testament to the naive ambition and enthusiasm with which we began the project.
