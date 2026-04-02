@@ -2,8 +2,13 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+#include <functional>
 #include "lsm_pricer.hpp"
 #include "bs_pricer.hpp"
+#include "underlying_sde.hpp"
+#include "option_payoff.hpp"
+#include "basis_functions.hpp"
 
 namespace lsm{
     namespace analysis{
@@ -12,14 +17,22 @@ namespace lsm{
         // defines the variables which only the class can see
         private:
             double S0, r, sigma, K, T;
-            std::string sdeType, payoffType, basisType;
+            const lsm::core::StochasticProcess& sdeType;
+            const lsm::core::OptionPayoff& payoffType;
+            const lsm::core::BasisSet& basisType;
+            std::function<void(lsm::core::BasisSet&, int)> basisFactory;
             int order, fixedPathCount, fixedNumDates;
 
             std::string paramString() const;
 
         // defines the functions which can be accessed outside of the class
         public:
-            ConvergenceAnalyser(double s, double r, double sigma, double K, double T, std::string sde, std::string payoff, std::string basis, int order, int fixedPathCount, int fixedNumDates);
+            ConvergenceAnalyser(double s, double r, double sigma, double K, double T,
+                const lsm::core::StochasticProcess& process,
+                const lsm::core::OptionPayoff& payoff,
+                const lsm::core::BasisSet& basis,
+                std::function<void(lsm::core::BasisSet&, int)> basisFactory,
+                int order, int fixedPathCount, int fixedNumDates);
 
             // helper functions to get the prices
 

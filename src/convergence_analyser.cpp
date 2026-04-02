@@ -15,8 +15,13 @@ namespace lsm{
     namespace analysis{
 
         // initialise the class
-        ConvergenceAnalyser::ConvergenceAnalyser(double s, double rate, double vol, double strike, double maturity, std::string sde, std::string payoff, std::string basis, int order, int pathCount, int numDates)
-            : S0(s), r(rate), sigma(vol), K(strike), T(maturity), sdeType(sde), payoffType(payoff), basisType(basis), order(order), fixedPathCount(pathCount), fixedNumDates(numDates)
+        ConvergenceAnalyser::ConvergenceAnalyser(double s, double rate, double vol, double strike, double maturity,
+            const lsm::core::StochasticProcess& process,
+            const lsm::core::OptionPayoff& payoff,
+            const lsm::core::BasisSet& basis,
+            std::function<void(lsm::core::BasisSet&, int)> factory,
+            int order, int pathCount, int numDates)
+            : S0(s), r(rate), sigma(vol), K(strike), T(maturity), sdeType(process), payoffType(payoff), basisType(basis), basisFactory(std::move(factory)), order(order), fixedPathCount(pathCount), fixedNumDates(numDates)
         {
 
         }
@@ -29,8 +34,9 @@ namespace lsm{
                 << "_r" << r
                 << "_sig" << sigma
                 << "_T" << T
-                << "_" << payoffType
-                << "_" << basisType
+                // add name function to the payoff thingy
+                // << "_" << (payoffType.InTheMoney(K + 1.0) ? "call" : "put")
+                << "_" << basisType.basisPtrs()[1]->name()
                 << "_ord" << order
                 << "_dates" << fixedNumDates
                 << "_paths" << fixedPathCount;
@@ -40,24 +46,14 @@ namespace lsm{
 
         // helper functions
         double ConvergenceAnalyser::getBSPrice() {
-
-            if (payoffType == "call")
-                return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, true);
-            else 
-                return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, false);
+            
+            // change to payoffType.name()
+            return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, payoffType.InTheMoney(K + 1.0));
         }
 
-          double ConvergenceAnalyser::getFDPrice() {
-
+        double ConvergenceAnalyser::getFDPrice() {
             lsm::core::GeometricBrownianMotion gbm(r, sigma);
-            
-            // checking for the payoff type
-            std::unique_ptr<lsm::core::OptionPayoff> payoff;
-            if (payoffType == "call")
-                payoff = std::make_unique<lsm::core::Call_payoff>(K);
-            else
-                payoff = std::make_unique<lsm::core::Put_payoff>(K);
-            return lsm::fd::FDPricer(gbm, *payoff).price(S0, T);
+            return lsm::fd::FDPricer(gbm, payoffType).price(S0, T);
         }
 
         double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths) {
@@ -68,26 +64,10 @@ namespace lsm{
             config.riskFreeRate = r;
             config.maturity = T;
 
-            // chechking for the sde type
-            std::unique_ptr<lsm::core::StochasticProcess> process;
-            if (sdeType == "gbm")
-                process = std::make_unique<lsm::core::GeometricBrownianMotion>(r, sigma);
+            lsm::core::BasisSet basis;
+            basisFactory(basis, order);
 
-            // checking for the payoff type
-            std::unique_ptr<lsm::core::OptionPayoff> payoff;
-            if (payoffType == "call")
-                payoff = std::make_unique<lsm::core::Call_payoff>(K);
-            else
-                payoff = std::make_unique<lsm::core::Put_payoff>(K);
-
-            // checking for the basis function type
-            auto basis = std::make_unique<lsm::core::BasisSet>();
-            if (basisType == "lag")
-                basis->makeLaguerreSet(order);
-            else
-                basis->makeMonomialSet(order);
-
-            lsm::engine::LSMPricer myPricer(std::move(process), std::move(payoff), std::move(basis), config);
+            lsm::engine::LSMPricer myPricer(sdeType, payoffType, basis, config);
             return myPricer.price(S0).optionValue;
         }
 
@@ -199,7 +179,7 @@ namespace lsm{
         double fdPrice = getFDPrice();
 
         // keep basis type in title since we run both basis types
-        std::cout << "\n--- Order Convergence | " << basisType << " ---\n\n";
+        std::cout << "\n--- Order Convergence | " << basisType.basisPtrs()[1]->name() << " ---\n\n";
         std::cout << std::fixed << std::setprecision(4);
         std::cout << std::right
                   << std::setw(12) << "Order"
@@ -287,15 +267,10 @@ namespace lsm{
 
         // generate the stock price and the payoff with gbm
         lsm::core::GeometricBrownianMotion gbm(r, sigma);
-        std::unique_ptr<lsm::core::OptionPayoff> pof;
-        if (payoffType == "call")
-            pof = std::make_unique<lsm::core::Call_payoff>(K);
-        else
-            pof = std::make_unique<lsm::core::Put_payoff>(K);
 
         for (int timeSteps : timeCounts) {
             auto start = std::chrono::high_resolution_clock::now();
-            double fdPrice = lsm::fd::FDPricer(gbm, *pof, stockSteps, timeSteps).price(S0, T);
+            double fdPrice = lsm::fd::FDPricer(gbm, payoffType, stockSteps, timeSteps).price(S0, T);
             auto end = std::chrono::high_resolution_clock::now();
             double ms = std::chrono::duration<double, std::milli>(end - start).count();
 

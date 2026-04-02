@@ -195,15 +195,12 @@ int main() {
         cfg_lsm.riskFreeRate = cfg::risk_free_rate;
         cfg_lsm.rngSeed = 42;
 
-        auto basis = std::make_unique<lsm::core::BasisSet>();
-        basis->makeLaguerreSet(cfg::basis_order);
+        lsm::core::GeometricBrownianMotion gbm(cfg::risk_free_rate, cfg::volatility);
+        lsm::core::Put_payoff put(cfg::strike);
+        lsm::core::BasisSet basis;
+        basis.makeLaguerreSet(cfg::basis_order);
 
-        lsm::engine::LSMPricer pricer(
-            std::make_unique<lsm::core::GeometricBrownianMotion>(cfg::risk_free_rate, cfg::volatility),
-            std::make_unique<lsm::core::Put_payoff>(cfg::strike),
-            std::move(basis),
-            cfg_lsm
-        );
+        lsm::engine::LSMPricer pricer(gbm, put, basis, cfg_lsm);
 
         std::cout << "\nLongstaff-Schwartz American Put (S0=" << cfg::initial_spot 
                   << ", K=" << cfg::strike << ", T=" << cfg::maturity << " yrs)\n";
