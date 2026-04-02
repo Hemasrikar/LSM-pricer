@@ -1,13 +1,14 @@
 #pragma once
 #include <cmath>
-#include <string>
-#include <stdexcept>
 #include <memory>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
-namespace lsm{
-    namespace core{
+namespace lsm {
+    namespace core {
 
+        // BasisFunction, abstract interface
         class BasisFunction {
         public:
             virtual ~BasisFunction() = default;
@@ -15,16 +16,15 @@ namespace lsm{
             virtual std::string name() const = 0;
         };
 
-        // ConstantBasis
-        // intercept term, evaluates to 1.0 for any given value
+        // ConstantBasis — always returns 1.0; used as the intercept term
         class ConstantBasis : public BasisFunction {
         public:
             double evaluate(double x) const override;
             std::string name() const override;
         };
 
-        // MonomialBasis
-        class MonomialBasis : public BasisFunction{
+        // MonomialBasis — evaluates x^power
+        class MonomialBasis : public BasisFunction {
         public:
             explicit MonomialBasis(int power);
             double evaluate(double x) const override;
@@ -33,8 +33,8 @@ namespace lsm{
             int power_;
         };
 
-        // LaguerrePolynomial
-        class LaguerrePolynomial : public BasisFunction{
+        // LaguerrePolynomial — evaluates e^{-x/2} * L_order(x) using three-term
+        class LaguerrePolynomial : public BasisFunction {
         public:
             explicit LaguerrePolynomial(int order);
             double evaluate(double x) const override;
@@ -43,24 +43,35 @@ namespace lsm{
             int order_;
         };
 
-        // BasisSet holds a list of basis functions and provides two ways to fill it.
-        
-        // makeLaguerreSet(n): builds {1, L0, L1, ..., L_{n-1}} — a constant intercept
-        //   plus n weighted Laguerre polynomials
-        //   Clears any existing basis before building. Throws if n < 1 or n > 5.
 
-        // makeMonomialSet(n): builds {1, x, x^2, ..., x^n} — a constant intercept
-        // plus monomials up to degree n. Clears any existing basis before building.
-        // Owns its basis functions via unique_ptr.
-        class BasisSet{
+        // BasisSet owns a collection of basis functions and provides factory
+        // methods to populate it
+        //makeLaguerreSet(n) : builds {1, L_0, L_1,.., L_{n-1}}
+        //makeMonomialSet(n) : builds {1, x, x^2,.., x^n}
+        // Both methods clear any existing basis before building.
+        // basisPtrs() returns non owning pointers for use by OLS Regressor.
+        class BasisSet {
         public:
-            std::vector<std::unique_ptr<BasisFunction>> basis;
+            BasisSet() = default;
 
-            // Returns plain (non-owning) pointers for use by OLSRegressor
-            std::vector<BasisFunction*> basisPtrs() const;
+            // unique_ptr members make copyable later so we should be
+            // deleting explicitly surfaces the error at the class definition.
+            BasisSet(const BasisSet&) = delete;
+            BasisSet& operator=(const BasisSet&) = delete;
+
+            // Moves are fine — unique_ptr supports them.
+            BasisSet(BasisSet&&) = default;
+            BasisSet& operator=(BasisSet&&) = default;
 
             void makeLaguerreSet(int numTerms);
             void makeMonomialSet(int numTerms);
+
+            std::vector<BasisFunction*> basisPtrs() const;
+            std::size_t size() const;
+            void clear();
+
+        private:
+            std::vector<std::unique_ptr<BasisFunction>> basis_;
         };
 
     } // namespace core
