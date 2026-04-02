@@ -8,6 +8,7 @@
 #include <fstream>
 #include <chrono>
 #include <cmath>
+#include <sstream>
 
 
 namespace lsm{
@@ -19,6 +20,23 @@ namespace lsm{
         {
 
         }
+
+        // creat the string which will be appended to the end of the file name
+        std::string ConvergenceAnalyser::paramString() const {
+            std::ostringstream oss;
+            oss << "S" << S0
+                << "_K" << K
+                << "_r" << r
+                << "_sig" << sigma
+                << "_T" << T
+                << "_" << payoffType
+                << "_" << basisType
+                << "_ord" << order
+                << "_dates" << fixedNumDates
+                << "_paths" << fixedPathCount;
+            return oss.str();
+        }
+
 
         // helper functions
         double ConvergenceAnalyser::getBSPrice() {
@@ -139,7 +157,7 @@ namespace lsm{
     }
 
     void ConvergenceAnalyser::runPathConvergence(std::vector<int> pathCounts) {
-        std::string filename = "csv_output/path_convergence.csv";
+        std::string filename = "csv_output/path_convergence_" + paramString() + ".csv";
         double fdPrice = getFDPrice();
 
         // output the titles of the table to the terminal
@@ -177,7 +195,7 @@ namespace lsm{
     }
 
     void ConvergenceAnalyser::runOrderConvergence(std::vector<int> orders) {
-        std::string filename   = "csv_output/" + basisType + "_order_convergence.csv";
+        std::string filename = "csv_output/order_convergence_" + paramString() + ".csv";
         double fdPrice = getFDPrice();
 
         // keep basis type in title since we run both basis types
@@ -214,7 +232,7 @@ namespace lsm{
     }
 
     void ConvergenceAnalyser::runDatesConvergence(std::vector<int> exerciseDatesList) {
-        std::string filename = "csv_output/exercise_dates_convergence.csv";
+        std::string filename = "csv_output/dates_convergence_" + paramString() + ".csv";
         double fdPrice = getFDPrice();
 
         // titles
@@ -251,7 +269,7 @@ namespace lsm{
     }
 
     void ConvergenceAnalyser::runFDConvergence(std::vector<int> timeCounts, int stockSteps) {
-        std::string filename = "csv_output/fd_convergence.csv";
+        std::string filename = "csv_output/fd_convergence_" + paramString() + ".csv";
         double bsPrice = getBSPrice();
 
         // titles
@@ -297,7 +315,7 @@ namespace lsm{
 
     void ConvergenceAnalyser::runSeedStability() {
         std::vector<int> seeds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        std::string filename   = "csv_output/seed_stability.csv";
+        std::string filename = "csv_output/seed_stability_" + paramString() + ".csv";
 
         double fdPrice = getFDPrice();
 

@@ -35,10 +35,6 @@ const std::vector<int> pathCounts = []() {
 
 // main function which goes through each type of convergence
 int main(){
-    std::ofstream params("csv_output/params.csv");
-    params << "S0,K,r,sigma,T\n"
-           << S0 << "," << K << "," << r << "," << sigma << "," << T << "\n";
-    params.close();
 
     lsm::analysis::ConvergenceAnalyser analyser(S0, r, sigma, K, T, sde, payoff, basis, fixedOrder, fixedPathCount, fixedNumDates);
 
