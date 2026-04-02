@@ -15,6 +15,13 @@ const int fixedOrder= 3;
 const int fixedNumDates = 50;
 const int fixedStockSteps = 1000; // for FD convergence
 
+
+// variables
+const std::string sde = "gbm";
+const std::string payoff = "put";
+const std::string basis = "lag";
+
+
 // parameter lists to iterate over in each convergence test
 const std::vector<int> orders = {1, 2, 3, 4, 5};
 const std::vector<int> exerciseDates = {1, 5, 10, 20, 50, 100};
@@ -33,16 +40,15 @@ int main(){
            << S0 << "," << K << "," << r << "," << sigma << "," << T << "\n";
     params.close();
 
-    lsm::analysis::ConvergenceAnalyser analyser(S0, r, sigma, K, T);
+    lsm::analysis::ConvergenceAnalyser analyser(S0, r, sigma, K, T, sde, payoff, basis, fixedOrder, fixedPathCount, fixedNumDates);
 
     analyser.runBenchmark();
 
-    analyser.runPathConvergence(true, pathCounts, fixedNumDates, fixedOrder);
-    analyser.runOrderConvergence(true, orders, fixedNumDates, fixedPathCount);   // Laguerre
-    analyser.runOrderConvergence(false, orders, fixedNumDates, fixedPathCount);  // Monomial (for comparison)
-    analyser.runDatesConvergence(true, exerciseDates, fixedOrder, fixedPathCount);
+    analyser.runPathConvergence(pathCounts);
+    analyser.runOrderConvergence(orders);
+    analyser.runDatesConvergence(exerciseDates);
     analyser.runFDConvergence(fdTimeCounts, fixedStockSteps);
-    analyser.runSeedStability(true);
+    analyser.runSeedStability();
 
     return 0;
 }

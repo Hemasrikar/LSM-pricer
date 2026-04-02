@@ -14,24 +14,35 @@ namespace lsm{
     namespace analysis{
 
         // initialise the class
-        ConvergenceAnalyser::ConvergenceAnalyser(double s, double rate, double vol, double strike, double maturity)
-            : S0(s), r(rate), sigma(vol), K(strike), T(maturity)
+        ConvergenceAnalyser::ConvergenceAnalyser(double s, double rate, double vol, double strike, double maturity, std::string sde, std::string payoff, std::string basis, int order, int pathCount, int numDates)
+            : S0(s), r(rate), sigma(vol), K(strike), T(maturity), sdeType(sde), payoffType(payoff), basisType(basis), order(order), fixedPathCount(pathCount), fixedNumDates(numDates)
         {
 
         }
 
         // helper functions
         double ConvergenceAnalyser::getBSPrice() {
-            return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, false);
+
+            if (payoffType == "call")
+                return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, true);
+            else 
+                return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, false);
         }
 
-        double ConvergenceAnalyser::getFDPrice() {
+          double ConvergenceAnalyser::getFDPrice() {
+
             lsm::core::GeometricBrownianMotion gbm(r, sigma);
-            lsm::core::Put_payoff payoff(K);
-            return lsm::fd::FDPricer(gbm, payoff).price(S0, T);
+            
+            // checking for the payoff type
+            std::unique_ptr<lsm::core::OptionPayoff> payoff;
+            if (payoffType == "call")
+                payoff = std::make_unique<lsm::core::Call_payoff>(K);
+            else
+                payoff = std::make_unique<lsm::core::Put_payoff>(K);
+            return lsm::fd::FDPricer(gbm, *payoff).price(S0, T);
         }
 
-        double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag) {
+        double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths) {
             lsm::engine::LSMConfig config;
             config.rngSeed = seed;
             config.numExerciseDates = numExerciseDates;
@@ -39,11 +50,21 @@ namespace lsm{
             config.riskFreeRate = r;
             config.maturity = T;
 
-            auto process = std::make_unique<lsm::core::GeometricBrownianMotion>(r, sigma);
-            auto payoff  = std::make_unique<lsm::core::Put_payoff>(K);
-            auto basis   = std::make_unique<lsm::core::BasisSet>();
+            // chechking for the sde type
+            std::unique_ptr<lsm::core::StochasticProcess> process;
+            if (sdeType == "gbm")
+                process = std::make_unique<lsm::core::GeometricBrownianMotion>(r, sigma);
 
-            if (isLag)
+            // checking for the payoff type
+            std::unique_ptr<lsm::core::OptionPayoff> payoff;
+            if (payoffType == "call")
+                payoff = std::make_unique<lsm::core::Call_payoff>(K);
+            else
+                payoff = std::make_unique<lsm::core::Put_payoff>(K);
+
+            // checking for the basis function type
+            auto basis = std::make_unique<lsm::core::BasisSet>();
+            if (basisType == "lag")
                 basis->makeLaguerreSet(order);
             else
                 basis->makeMonomialSet(order);
@@ -87,8 +108,9 @@ namespace lsm{
                     // get the black scholes, fd and lsm prices
                     double bsPrice  = getBSPrice();
                     double fdPrice  = getFDPrice();
-                    double lsmPrice = getLSMPrice(24, 50, 3, 100000, true);
-// compute the premium you pay for having early exercise
+                    double lsmPrice = getLSMPrice(24, fixedNumDates, order, fixedPathCount);
+                    
+                    // compute the premium you pay for having early exercise
                     double eeValue  = lsmPrice - bsPrice;
 
                     std::cout << std::right
@@ -116,7 +138,7 @@ namespace lsm{
         T     = origT;
     }
 
-    void ConvergenceAnalyser::runPathConvergence(bool isLag, std::vector<int> pathCounts, int numExerciseDates, int order) {
+    void ConvergenceAnalyser::runPathConvergence(std::vector<int> pathCounts) {
         std::string filename = "csv_output/path_convergence.csv";
         double fdPrice = getFDPrice();
 
@@ -135,7 +157,7 @@ namespace lsm{
 
         for (int i : pathCounts){
             auto start = std::chrono::high_resolution_clock::now();
-            double lsmPrice = getLSMPrice(24, numExerciseDates, order, i, isLag);
+            double lsmPrice = getLSMPrice(24, fixedNumDates, order, i);
             auto end = std::chrono::high_resolution_clock::now();
             double ms = std::chrono::duration<double, std::milli>(end - start).count();
 
@@ -154,14 +176,12 @@ namespace lsm{
         std::cout << "\n  -> Written to: " << filename << "\n";
     }
 
-    void ConvergenceAnalyser::runOrderConvergence(bool isLag, std::vector<int> orders, int numExerciseDates, int pathCount) {
-        std::string basisLabel = isLag ? "laguerre" : "monomial";
-        std::string basisDisp  = isLag ? "Laguerre" : "Monomial";
-        std::string filename   = "csv_output/" + basisLabel + "_order_convergence.csv";
+    void ConvergenceAnalyser::runOrderConvergence(std::vector<int> orders) {
+        std::string filename   = "csv_output/" + basisType + "_order_convergence.csv";
         double fdPrice = getFDPrice();
 
         // keep basis type in title since we run both basis types
-        std::cout << "\n--- Order Convergence | " << basisDisp << " ---\n\n";
+        std::cout << "\n--- Order Convergence | " << basisType << " ---\n\n";
         std::cout << std::fixed << std::setprecision(4);
         std::cout << std::right
                   << std::setw(12) << "Order"
@@ -175,7 +195,7 @@ namespace lsm{
 
         for (int i : orders){
             auto start = std::chrono::high_resolution_clock::now();
-            double lsmPrice = getLSMPrice(24, numExerciseDates, i, pathCount, isLag);
+            double lsmPrice = getLSMPrice(24, fixedNumDates, i, fixedPathCount);
             auto end = std::chrono::high_resolution_clock::now();
             double ms = std::chrono::duration<double, std::milli>(end - start).count();
 
@@ -193,7 +213,7 @@ namespace lsm{
         std::cout << "\n  -> Written to: " << filename << "\n";
     }
 
-    void ConvergenceAnalyser::runDatesConvergence(bool isLag, std::vector<int> exerciseDatesList, int order, int pathCount) {
+    void ConvergenceAnalyser::runDatesConvergence(std::vector<int> exerciseDatesList) {
         std::string filename = "csv_output/exercise_dates_convergence.csv";
         double fdPrice = getFDPrice();
 
@@ -212,7 +232,7 @@ namespace lsm{
 
         for (int i : exerciseDatesList){
             auto start = std::chrono::high_resolution_clock::now();
-            double lsmPrice = getLSMPrice(24, i, order, pathCount, isLag);
+            double lsmPrice = getLSMPrice(24, i, order, fixedPathCount);
             auto end = std::chrono::high_resolution_clock::now();
             double ms = std::chrono::duration<double, std::milli>(end - start).count();
 
@@ -249,11 +269,15 @@ namespace lsm{
 
         // generate the stock price and the payoff with gbm
         lsm::core::GeometricBrownianMotion gbm(r, sigma);
-        lsm::core::Put_payoff payoff(K);
+        std::unique_ptr<lsm::core::OptionPayoff> pof;
+        if (payoffType == "call")
+            pof = std::make_unique<lsm::core::Call_payoff>(K);
+        else
+            pof = std::make_unique<lsm::core::Put_payoff>(K);
 
         for (int timeSteps : timeCounts) {
             auto start = std::chrono::high_resolution_clock::now();
-            double fdPrice = lsm::fd::FDPricer(gbm, payoff, stockSteps, timeSteps).price(S0, T);
+            double fdPrice = lsm::fd::FDPricer(gbm, *pof, stockSteps, timeSteps).price(S0, T);
             auto end = std::chrono::high_resolution_clock::now();
             double ms = std::chrono::duration<double, std::milli>(end - start).count();
 
@@ -271,13 +295,9 @@ namespace lsm{
         std::cout << "\n  -> Written to: " << filename << "\n";
     }
 
-    void ConvergenceAnalyser::runSeedStability(bool isLag) {
+    void ConvergenceAnalyser::runSeedStability() {
         std::vector<int> seeds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         std::string filename   = "csv_output/seed_stability.csv";
-
-        int numExerciseDates = 50;
-        int pathCount        = 10000;
-        int order            = 3;
 
         double fdPrice = getFDPrice();
 
@@ -297,7 +317,7 @@ namespace lsm{
 
         for (int seed : seeds) {
             auto start      = std::chrono::high_resolution_clock::now();
-            double lsmPrice = getLSMPrice(seed, numExerciseDates, order, pathCount, isLag);
+            double lsmPrice = getLSMPrice(seed, fixedNumDates, order, fixedPathCount);
             auto end        = std::chrono::high_resolution_clock::now();
             double ms       = std::chrono::duration<double, std::milli>(end - start).count();
 

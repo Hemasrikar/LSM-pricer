@@ -2,8 +2,8 @@
 #include "catch.hpp"
 #include "convergence_analyser.hpp"
 
-// constructor: S0=36, r=0.06, sigma=0.20, K=40, T=1 (Longstaff-Schwartz put parameters)
-static lsm::analysis::ConvergenceAnalyser analyser(36.0, 0.06, 0.2, 40.0, 1.0);
+
+static lsm::analysis::ConvergenceAnalyser analyser(100.0, 0.05, 0.2, 100.0, 1.0, "gbm", "call", "lag", 3, 10000, 50);
 
 using namespace lsm::analysis;
 
