@@ -16,6 +16,6 @@ TEST_CASE("getFDPrice returns a positive price", "[convergence]") {
 }
 
 TEST_CASE("getLSMPrice returns a positive price", "[convergence]") {
-    REQUIRE(analyser.getLSMPrice(24, 50, 3, 1000, true) > 0.0);
+    REQUIRE(analyser.getLSMPrice(24, 50, 3, 1000) > 0.0);
 }
 
