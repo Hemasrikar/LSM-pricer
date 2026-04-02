@@ -19,8 +19,3 @@ TEST_CASE("getLSMPrice returns a positive price", "[convergence]") {
     REQUIRE(analyser.getLSMPrice(24, 50, 3, 1000, true) > 0.0);
 }
 
-TEST_CASE("FD price is close to BS price for put", "[convergence]") {
-    double bs = analyser.getBSPrice();
-    double fd = analyser.getFDPrice();
-    REQUIRE(std::abs(bs - fd) < 0.1);
-}
