@@ -12,27 +12,33 @@ namespace lsm{
         // defines the variables which only the class can see
         private:
             double S0, r, sigma, K, T;
-            bool isCall;
 
         // defines the functions which can be accessed outside of the class
         public:
-            ConvergenceAnalyser(double s, double r, double sigma, double K, double T, bool call);
+            ConvergenceAnalyser(double s, double r, double sigma, double K, double T);
 
             // helper functions to get the prices
 
             double getBSPrice();
 
-            double getFDPrice(bool isCall);
+            double getFDPrice();
 
             double getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag);
 
+
             // functions to run the convergence analysis
 
-            void runBenchmark(bool isCall);
+            void runBenchmark();
 
-            void runConvergence(const std::string& mode, bool isLag, bool isCall);
+            void runPathConvergence(bool isLag, std::vector<int> pathCounts, int numExerciseDates, int order);
 
-            void runSeedStability(bool isLag, bool isCall);
+            void runDatesConvergence(bool isLag, std::vector<int> exerciseDatesList, int order, int pathCount);
+
+            void runOrderConvergence(bool isLag, std::vector<int> orders, int numExerciseDates, int pathCount);
+
+            void runFDConvergence(std::vector<int> timeCounts, int stockSteps);
+
+            void runSeedStability(bool isLag);
         };
     } // namespace analysis
 
