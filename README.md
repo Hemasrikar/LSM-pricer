@@ -34,5 +34,5 @@ Three layers:
 
 
 <div align="center">
-  <img src="https://github.com/IB9JHO-2025-2026/group-assignment-unicorn/blob/main/extern/catch2/unicorn%20cutout.png" alt="Unicorn Mascot" width="300">
+  <img src="extern/catch2/unicorn cutout.png" alt="Unicorn Mascot" width="300">
 </div>
