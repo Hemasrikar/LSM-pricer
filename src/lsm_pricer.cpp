@@ -7,7 +7,30 @@
 
 namespace lsm {
     namespace engine {
-
+    /*-------------------------------------------------------------------------------------------------
+     * CONSTRUCT AN LSM PRICER
+     *
+     * Initialises the pricer with a stochastic process, payoff, regression basis,
+     * and numerical configuration. Ownership of the process, payoff, and basis
+     * objects is transferred into the class through std::unique_ptr.
+     *
+     * This design supports:
+     *   - Abstraction: the pricer depends on abstract interfaces rather than
+     *     concrete model implementations.
+     *   - Polymorphism: different derived processes, payoffs, and basis systems
+     *     can be supplied without changing the pricing logic.
+     *   - RAII: resource ownership is tied to object lifetime, avoiding manual
+     *     memory management.
+     *
+     * Parameters:
+     *    - process  Owned pointer to the stochastic process model.
+     *    - payoff   Owned pointer to the option payoff object.
+     *    - basis    Owned pointer to the regression basis object.
+     *    - config   Numerical configuration for simulation and pricing.
+     *
+     * Throws: std::invalid_argument if any input pointer is null.
+     *
+    ---------------------------------------------------------------------------------------------------*/
     LSMPricer::LSMPricer(
     std::unique_ptr<const lsm::core::StochasticProcess> process,
     std::unique_ptr<const lsm::core::OptionPayoff> payoff,
@@ -133,6 +156,34 @@ namespace lsm {
 
             return data;
         }
+    /*-------------------------------------------------------------------------------------------------
+    * PERFORM BACKWARD INDUCTION FOR THE LSM ALGORITHM
+    *
+    * Implements the core Longstaff-Schwartz recursion. Starting from maturity,
+    * the method moves backwards through the exercise dates and determines whether
+    * early exercise is optimal on each simulated path.
+    *
+    * At each time step:
+    *   - in-the-money paths are identified,
+    *   - discounted future cashflows are used in the regression step,
+    *   - continuation values are estimated via OLS,
+    *   - immediate exercise is compared against continuation.
+    *
+    * If early exercise is optimal, the pathwise cashflow is updated and all
+    * later cashflows on that path are set to zero.
+    *
+    * Parameters:
+    *    - data  PathData object containing simulated paths and pathwise cashflows.
+    *
+    * Returns: A vector of present values at time 0, one for each simulated path.
+    *
+    * Notes:
+    *    - Terminal payoffs initialise the recursion.
+    *    - Only in-the-money paths enter the exercise decision.
+    *    - Regression coefficients / continuation values are supplied by
+    *      Ols_regression using the chosen basis system.
+    *
+    ---------------------------------------------------------------------------------------------------*/
     
     std::vector<double> LSMPricer::backwardInduction(PathData& data) const
     {
@@ -209,12 +260,33 @@ namespace lsm {
         }
         }  
         std::vector<double> presentValue(numPaths, 0.0);
-        
+        //find present value
         for(int i = 0; i < numPaths; ++i){
             presentValue[i] = cashflow[i] * std::exp(-config.riskFreeRate*dt*exerciseTime[i]);
         }
         return presentValue;
     }
+    /*-------------------------------------------------------------------------------------------------
+    * COMPUTE SUMMARY PRICING STATISTICS
+    *
+    * Aggregates pathwise present values into the final Monte Carlo estimate of
+    * the American option price. Also computes the standard error, European
+    * benchmark, and early exercise premium.
+    *
+    * Parameters:
+    *    - pv             Vector of discounted pathwise option values at time 0.
+    *    - europeanValue  European benchmark value.
+    *    - N              Number of simulated paths.
+    *    - T              Number of exercise dates.
+    *
+    * Returns: A SimulationResult object containing the option value and
+    *          associated summary statistics.
+    *
+    * Notes:
+    *    - The option value is the sample mean of the pathwise present values.
+    *    - The standard error is computed from the sample variance.
+    *
+    ---------------------------------------------------------------------------------------------------*/
 
     SimulationResult LSMPricer::computeOptionValue(
         const std::vector<double>& pv, 
@@ -249,6 +321,20 @@ namespace lsm {
         return result;
 
     }
+    /*-------------------------------------------------------------------------------------------------
+    * SIMULATE PATHS USING THE PRICER'S STORED MODEL AND CONFIGURATION
+    *
+    * This member function provides a class-level wrapper around the standalone
+    * simulation routine. It uses the stochastic process owned by the pricer
+    * together with the stored numerical configuration.
+    *
+    * Parameters:
+    *    - S0  Initial asset price.
+    *
+    * Returns: A PathData object containing simulated paths and zero-initialised
+    *          cashflow storage.
+    *
+    ---------------------------------------------------------------------------------------------------*/
     PathData LSMPricer::simulatePaths(double S0) const
     {
         return lsm::engine::simulatePaths(S0, *process, config);
