@@ -19,8 +19,6 @@ namespace lsm {
      *     concrete model implementations.
      *   - Polymorphism: different derived processes, payoffs, and basis systems
      *     can be supplied without changing the pricing logic.
-     *   - RAII: resource ownership is tied to object lifetime, avoiding manual
-     *     memory management.
      *
      * Parameters:
      *    - process  Owned pointer to the stochastic process model.
@@ -40,9 +38,9 @@ namespace lsm {
     {
     }
 
-        // Define the function simulatePaths with return type as PathData
-        // With S0 initial price 
-        // const StochasticProcess & process refers back to an object that represents the stochastic model
+    // Define the function simulatePaths with return type as PathData
+    // With S0 initial price 
+    // const StochasticProcess & process refers back to an object that represents the stochastic model
     PathData simulatePaths(
         double S0,
         const lsm::core::StochasticProcess& process,
