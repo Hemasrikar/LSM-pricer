@@ -34,5 +34,5 @@ Three layers:
 
 
 <div align="center">
-  <img src="extern/catch2/unicorn cutout.png" alt="Unicorn Mascot" width="300">
+  <img src="extern/unicorn cutout.png" alt="Unicorn Mascot" width="300">
 </div>
