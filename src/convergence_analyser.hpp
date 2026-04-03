@@ -17,7 +17,7 @@ namespace lsm{
         // defines the variables which only the class can see
         private:
             double S0, r, sigma, K, T;
-            const lsm::core::StochasticProcess& sdeType;
+            std::function<std::unique_ptr<lsm::core::StochasticProcess>(double, double)> sdeFactory;
             const lsm::core::OptionPayoff& payoffType;
             const lsm::core::BasisSet& basisType;
             std::function<void(lsm::core::BasisSet&, int)> basisFactory;
@@ -28,7 +28,7 @@ namespace lsm{
         // defines the functions which can be accessed outside of the class
         public:
             ConvergenceAnalyser(double s, double r, double sigma, double K, double T,
-                const lsm::core::StochasticProcess& process,
+                std::function<std::unique_ptr<lsm::core::StochasticProcess>(double, double)> sdeFactory,
                 const lsm::core::OptionPayoff& payoff,
                 const lsm::core::BasisSet& basis,
                 std::function<void(lsm::core::BasisSet&, int)> basisFactory,

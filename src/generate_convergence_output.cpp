@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <memory>
 #include "convergence_analyser.hpp"
+#include "underlying_sde.hpp"
 
 // market parameters
 const double S0 = 36.0;
@@ -30,7 +32,11 @@ const std::vector<int> pathCounts = []() {
 // main function which goes through each type of convergence
 int main(){
 
-    lsm::core::GeometricBrownianMotion gbm(r, sigma);
+    std::function<std::unique_ptr<lsm::core::StochasticProcess>(double, double)> sdeFactory =
+        [](double rate, double vol) {
+            return std::make_unique<lsm::core::GeometricBrownianMotion>(rate, vol);
+        };
+
     lsm::core::Put_payoff put(K);
 
     lsm::core::BasisSet basis;
@@ -40,7 +46,7 @@ int main(){
         bs.makeLaguerreSet(order);
     };
 
-    lsm::analysis::ConvergenceAnalyser analyser(S0, r, sigma, K, T, gbm, put, basis, basisFactory, fixedOrder, fixedPathCount, fixedNumDates);
+    lsm::analysis::ConvergenceAnalyser analyser(S0, r, sigma, K, T, sdeFactory, put, basis, basisFactory, fixedOrder, fixedPathCount, fixedNumDates);
 
     analyser.runBenchmark();
 
