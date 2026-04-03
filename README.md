@@ -31,3 +31,8 @@ Three layers:
 - **`lsm::analysis`** - convergence studies and benchmarking via `ConvergenceAnalyser`
 
 > Why we chose Unicorn as a team name: Unicorn was a memorable mascot for our team project, while also being quick and easy to type in command terminals. The term is also used in the tech industry to denote fast-growing startups valued at over US$1 billion, a testament to the naive ambition and enthusiasm with which we began the project.
+
+
+<div align="center">
+  <img src="https://github.com/IB9JHO-2025-2026/group-assignment-unicorn/blob/main/extern/catch2/unicorn%20cutout.png" alt="Unicorn Mascot" width="300">
+</div>
