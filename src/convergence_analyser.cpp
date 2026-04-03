@@ -16,12 +16,12 @@ namespace lsm{
 
         // initialise the class
         ConvergenceAnalyser::ConvergenceAnalyser(double s, double rate, double vol, double strike, double maturity,
-            const lsm::core::StochasticProcess& process,
+            std::function<std::unique_ptr<lsm::core::StochasticProcess>(double, double)> process,
             const lsm::core::OptionPayoff& payoff,
             const lsm::core::BasisSet& basis,
             std::function<void(lsm::core::BasisSet&, int)> factory,
             int order, int pathCount, int numDates)
-            : S0(s), r(rate), sigma(vol), K(strike), T(maturity), sdeType(process), payoffType(payoff), basisType(basis), basisFactory(std::move(factory)), order(order), fixedPathCount(pathCount), fixedNumDates(numDates)
+            : S0(s), r(rate), sigma(vol), K(strike), T(maturity), sdeFactory(std::move(process)), payoffType(payoff), basisType(basis), basisFactory(std::move(factory)), order(order), fixedPathCount(pathCount), fixedNumDates(numDates)
         {
 
         }
@@ -67,7 +67,8 @@ namespace lsm{
             lsm::core::BasisSet basis;
             basisFactory(basis, order);
 
-            lsm::engine::LSMPricer myPricer(sdeType, payoffType, basis, config);
+            auto process = sdeFactory(r, sigma);
+            lsm::engine::LSMPricer myPricer(*process, payoffType, basis, config);
             return myPricer.price(S0).optionValue;
         }
 
