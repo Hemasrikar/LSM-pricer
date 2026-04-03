@@ -19,7 +19,7 @@ static BasisSet makeTestBasis() {
     return basis;
 }
 
-//Test 4: check if priceWithData() returns correctly shaped paths
+//Test 1: check if priceWithData() returns correctly shaped paths
 TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pricer]") {
     LSMConfig config;
     config.numPaths = 100;
@@ -57,7 +57,7 @@ TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pr
     REQUIRE(result.numExerciseDates == 10);
 }
 
-//TEST 5: Check whether LSMPricer enforces even number of pahs when using antithetic 
+//TEST 2: Check whether LSMPricer enforces even number of pahs when using antithetic 
 //variation reduction
 
 TEST_CASE("LSMPricer enforces even number of paths when using antithetic variates", "[lsm_pricer]") {
@@ -85,7 +85,7 @@ TEST_CASE("LSMPricer enforces even number of paths when using antithetic variate
     REQUIRE(data.cashFlows.size() == 100);
 }
 
-//TEST 6: Check whether LSM returns finite and consistent results
+//TEST 3: Check whether LSM returns finite and consistent results
 
 TEST_CASE("LSMPricer returns finite and consistent results", "[lsm_pricer]") {
     LSMConfig config;
@@ -128,7 +128,7 @@ TEST_CASE("LSMPricer returns finite and consistent results", "[lsm_pricer]") {
 // Financial intuition tests
 // ------------------------------------------------------------
 
-//TEST 7: American put has to be at least European value
+//TEST 4: American put has to be at least European value
 TEST_CASE("American put value is at least European value", "[lsm_pricer]") {
     LSMConfig config;
     config.numPaths = 5000;
@@ -150,7 +150,7 @@ TEST_CASE("American put value is at least European value", "[lsm_pricer]") {
     REQUIRE(result.optionValue >= Approx(result.europeanValue).margin(1e-10));
 }
 
-//TEST 8: Put value decreases as spot increases, i.e., S1 < S2 -> P(S1) >= P(S2)
+//TEST 5: Put value decreases as spot increases, i.e., S1 < S2 -> P(S1) >= P(S2)
 TEST_CASE("Put option value decreases as spot increases", "[lsm_pricer]") {
     LSMConfig config;
     config.numPaths = 5000;
@@ -176,7 +176,7 @@ TEST_CASE("Put option value decreases as spot increases", "[lsm_pricer]") {
     REQUIRE(P_mid >= P_high);
 }
 
-//TEST 9: LSM must be approximately Finite difference benchmark
+//TEST 6: LSM must be approximately Finite difference benchmark
 //use margin of 0.5 since LSM is noisy since its Monte Carlo estimate
 //whereas FD is deterministic (almost exact benchmark)
 
@@ -216,7 +216,7 @@ TEST_CASE("LSM price is close to finite difference benchmark", "[lsm_pricer]") {
     REQUIRE(lsm_price == Approx(fd_price).margin(0.5));
 }
 
-//TEST 10: Put increases as strike increases
+//TEST 7: Put increases as strike increases
 TEST_CASE("Put option value increases as strike increases", "[lsm_pricer]") {
     LSMConfig config;
     config.numPaths = 5000;
@@ -244,7 +244,7 @@ TEST_CASE("Put option value increases as strike increases", "[lsm_pricer]") {
     REQUIRE(P_midK <= P_highK);
 }
 
-//TEST 11: Put value increases as volatility increases
+//TEST 8: Put value increases as volatility increases
 TEST_CASE("Put option value increases as volatility increases", "[lsm_pricer]") {
     LSMConfig config;
     config.numPaths = 5000;
@@ -272,7 +272,7 @@ TEST_CASE("Put option value increases as volatility increases", "[lsm_pricer]") 
     REQUIRE(P_midVol <= P_highVol);
 }
 
-//TEST 12: we require: DEEP ITM > ATM > OTM  - related to spot monotonicity
+//TEST 9: we require: DEEP ITM > ATM > OTM  - related to spot monotonicity
 TEST_CASE("Put option value is highest deep in the money and lowest out of the money", "[lsm_pricer]") {
     LSMConfig config;
     config.numPaths = 5000;
@@ -298,7 +298,7 @@ TEST_CASE("Put option value is highest deep in the money and lowest out of the m
     REQUIRE(P_ATM >= P_OTM);
 }
 
-//TEST 13: Imediate exercise lower bound: V^AM(S0) >= (K - S0)+
+//TEST 10: Imediate exercise lower bound: V^AM(S0) >= (K - S0)+
 TEST_CASE("American put value is at least immediate exercise value", "[lsm_pricer]") {
     LSMConfig config;
     config.numPaths = 5000;
