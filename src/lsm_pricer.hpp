@@ -56,11 +56,6 @@ namespace lsm {
         // - Encapsulation: path simulation, backward induction, and valuation
         //   are contained within a single pricing workflow.
         //
-        // Resource management:
-        // - Dependencies are owned through std::unique_ptr, so their lifetimes
-        //   are tied to the lifetime of the pricer.
-        // - This follows RAII principles and avoids manual memory management.
-
         class LSMPricer{
         public:
         // Construct the pricer by transferring ownership of the process,
