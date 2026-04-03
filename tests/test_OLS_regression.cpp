@@ -8,17 +8,6 @@
 using namespace lsm::core;
 using namespace lsm::engine;
 
-TEST_CASE("0 == 0", "[tests]")
-{
-	REQUIRE(0 == 0);
-}
-
-TEST_CASE("1 + 1 == 2", "[tests]")
-{
-	REQUIRE(1 + 1 == 2);
-}
-
-
 TEST_CASE("OLS: DesignMatrixTest with Monomial Basis", "ols")
 {
 std::vector<double> S_t = {100, 110, 90, 95, 105};

@@ -45,28 +45,49 @@ namespace lsm {
         int    numExerciseDates     = 0;
         };
 
-                class LSMPricer{
+
+        // Longstaff-Schwartz Monte Carlo pricer for American-style options.
+        //
+        // Object-oriented design:
+        // - Abstraction: the pricer depends on the abstract interfaces
+        //   StochasticProcess, OptionPayoff, and BasisSet.
+        // - Polymorphism: different derived models, payoffs, and basis systems
+        //   can be supplied at runtime without changing the pricing logic.
+        // - Encapsulation: path simulation, backward induction, and valuation
+        //   are contained within a single pricing workflow.
+        //
+        class LSMPricer{
         public:
+        // Construct the pricer by transferring ownership of the process,
+        // payoff, and basis objects into the class.
+        
             LSMPricer(
                 const lsm::core::StochasticProcess& process,
                 const lsm::core::OptionPayoff& payoff,
                 const lsm::core::BasisSet& basis,
                 const lsm::engine::LSMConfig& config);
-            
-                lsm::engine::SimulationResult price(double S0);
                 
+                // Price the option from initial asset value S0
+                lsm::engine::SimulationResult price(double S0);
+
+                // Price the option and also return the generated path data.
                 std::pair<lsm::engine::SimulationResult, lsm::engine::PathData> priceWithData(double S0);
         private:
+
             const lsm::core::StochasticProcess& process;
             const lsm::core::OptionPayoff& payoff;
             const lsm::core::BasisSet& basis;
-
+            // Numerical configuration stored by value.
             lsm::engine::LSMConfig config;
 
+            // Simulate all asset price paths required by the Monte Carlo stage.
             lsm::engine::PathData simulatePaths(double S0) const;
 
+            // Perform backward induction:
             std::vector<double> backwardInduction(lsm::engine::PathData& data) const;
 
+            // Aggregate discounted pathwise payoffs into final pricing statistics,
+            // including standard error and early exercise premium.
             lsm::engine::SimulationResult computeOptionValue(
                 const std::vector<double>& pv,
                 double europeanValue,
