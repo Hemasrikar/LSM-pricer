@@ -13,54 +13,10 @@ using namespace lsm::engine;
 
 //helper function to build a basis set
 
-static std::unique_ptr<BasisSet> makeTestBasis() {
-    auto basis = std::make_unique<BasisSet>();
-    basis->makeMonomialSet(2);
+static BasisSet makeTestBasis() {
+    BasisSet basis;
+    basis.makeMonomialSet(2);
     return basis;
-}
-
-
-//TEST 1: constructor throws if process is null.
-
-TEST_CASE("LSMPricer constructor throws if process is null", "[lsm_pricer]") {
-    LSMConfig config;
-
-    std::unique_ptr<const StochasticProcess> process = nullptr;
-    auto payoff = std::make_unique<Put_payoff>(40.0);
-    auto basis = makeTestBasis();
-
-    REQUIRE_THROWS_AS(
-        LSMPricer(std::move(process), std::move(payoff), std::move(basis), config),
-        std::invalid_argument
-    );
-}
-
-//TEST 2: Constructor throws if payoff is null
-TEST_CASE("LSMPricer constructor throws if payoff is null", "[lsm_pricer]") {
-    LSMConfig config;
-
-    auto process = std::make_unique<GeometricBrownianMotion>(0.06, 0.2);
-    std::unique_ptr<const OptionPayoff> payoff = nullptr;
-    auto basis = makeTestBasis();
-
-    REQUIRE_THROWS_AS(
-        LSMPricer(std::move(process), std::move(payoff), std::move(basis), config),
-        std::invalid_argument
-    );
-}
-
-//TEST 3: constructor throws if basis is null
-TEST_CASE("LSMPricer constructor throws if basis is null", "[lsm_pricer]") {
-    LSMConfig config;
-
-    auto process = std::make_unique<GeometricBrownianMotion>(0.06, 0.2);
-    auto payoff = std::make_unique<Put_payoff>(40.0);
-    std::unique_ptr<BasisSet> basis = nullptr;
-
-    REQUIRE_THROWS_AS(
-        LSMPricer(std::move(process), std::move(payoff), std::move(basis), config),
-        std::invalid_argument
-    );
 }
 
 //Test 4: check if priceWithData() returns correctly shaped paths
@@ -73,11 +29,11 @@ TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pr
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
 
-    auto process = std::make_unique<GeometricBrownianMotion>(0.06, 0.2);
-    auto payoff = std::make_unique<Put_payoff>(40.0);
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
 
-    LSMPricer pricer(std::move(process), std::move(payoff), std::move(basis), config);
+    LSMPricer pricer(process, payoff, basis, config);
 
     const double S0 = 40.0;
     auto resultPair = pricer.priceWithData(S0);
@@ -113,11 +69,11 @@ TEST_CASE("LSMPricer enforces even number of paths when using antithetic variate
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
 
-    auto process = std::make_unique<GeometricBrownianMotion>(0.06, 0.2);
-    auto payoff = std::make_unique<Put_payoff>(40.0);
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
 
-    LSMPricer pricer(std::move(process), std::move(payoff), std::move(basis), config);
+    LSMPricer pricer(process, payoff, basis, config);
 
     const double S0 = 40.0;
     auto resultPair = pricer.priceWithData(S0);
@@ -140,11 +96,11 @@ TEST_CASE("LSMPricer returns finite and consistent results", "[lsm_pricer]") {
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
 
-    auto process = std::make_unique<GeometricBrownianMotion>(0.06, 0.2);
-    auto payoff = std::make_unique<Put_payoff>(40.0);
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
 
-    LSMPricer pricer(std::move(process), std::move(payoff), std::move(basis), config);
+    LSMPricer pricer(process, payoff, basis, config);
 
     const double S0 = 40.0;
     SimulationResult result = pricer.price(S0);
@@ -182,11 +138,11 @@ TEST_CASE("American put value is at least European value", "[lsm_pricer]") {
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
 
-    auto process = std::make_unique<GeometricBrownianMotion>(0.06, 0.2);
-    auto payoff = std::make_unique<Put_payoff>(40.0);
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
 
-    LSMPricer pricer(std::move(process), std::move(payoff), std::move(basis), config);
+    LSMPricer pricer(process, payoff, basis, config);
 
     const double S0 = 40.0;
     SimulationResult result = pricer.price(S0);
@@ -204,30 +160,13 @@ TEST_CASE("Put option value decreases as spot increases", "[lsm_pricer]") {
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
 
-    auto process = std::make_unique<GeometricBrownianMotion>(0.06, 0.2);
-    auto payoff = std::make_unique<Put_payoff>(40.0);
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
 
-    LSMPricer pricer1(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
-
-    LSMPricer pricer2(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
-
-    LSMPricer pricer3(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
+    LSMPricer pricer1(process, payoff, basis, config);
+    LSMPricer pricer2(process, payoff, basis, config);
+    LSMPricer pricer3(process, payoff, basis, config);
 
     double P_low  = pricer1.price(30.0).optionValue;
     double P_mid  = pricer2.price(40.0).optionValue;
@@ -259,12 +198,10 @@ TEST_CASE("LSM price is close to finite difference benchmark", "[lsm_pricer]") {
     config.rngSeed = 24;
 
     // --- LSM pricer ---
-    LSMPricer lsm_pricer(
-        std::make_unique<GeometricBrownianMotion>(r, sigma),
-        std::make_unique<Put_payoff>(K),
-        makeTestBasis(),
-        config
-    );
+    GeometricBrownianMotion lsm_process(r, sigma);
+    Put_payoff lsm_payoff(K);
+    auto lsm_basis = makeTestBasis();
+    LSMPricer lsm_pricer(lsm_process, lsm_payoff, lsm_basis, config);
 
     double lsm_price = lsm_pricer.price(S0).optionValue;
 
@@ -289,26 +226,13 @@ TEST_CASE("Put option value increases as strike increases", "[lsm_pricer]") {
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
 
-    LSMPricer pricer1(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(35.0),
-        makeTestBasis(),
-        config
-    );
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff35(35.0), payoff40(40.0), payoff45(45.0);
+    auto basis = makeTestBasis();
 
-    LSMPricer pricer2(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
-
-    LSMPricer pricer3(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(45.0),
-        makeTestBasis(),
-        config
-    );
+    LSMPricer pricer1(process, payoff35, basis, config);
+    LSMPricer pricer2(process, payoff40, basis, config);
+    LSMPricer pricer3(process, payoff45, basis, config);
 
     const double S0 = 40.0;
 
@@ -330,26 +254,13 @@ TEST_CASE("Put option value increases as volatility increases", "[lsm_pricer]") 
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
 
-    LSMPricer pricer1(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.15),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
+    GeometricBrownianMotion proc15(0.06, 0.15), proc25(0.06, 0.25), proc35(0.06, 0.35);
+    Put_payoff payoff(40.0);
+    auto basis = makeTestBasis();
 
-    LSMPricer pricer2(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.25),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
-
-    LSMPricer pricer3(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.35),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
+    LSMPricer pricer1(proc15, payoff, basis, config);
+    LSMPricer pricer2(proc25, payoff, basis, config);
+    LSMPricer pricer3(proc35, payoff, basis, config);
 
     const double S0 = 40.0;
 
@@ -371,26 +282,13 @@ TEST_CASE("Put option value is highest deep in the money and lowest out of the m
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
 
-    LSMPricer pricer1(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff(40.0);
+    auto basis = makeTestBasis();
 
-    LSMPricer pricer2(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
-
-    LSMPricer pricer3(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(40.0),
-        makeTestBasis(),
-        config
-    );
+    LSMPricer pricer1(process, payoff, basis, config);
+    LSMPricer pricer2(process, payoff, basis, config);
+    LSMPricer pricer3(process, payoff, basis, config);
 
     double P_ITM = pricer1.price(30.0).optionValue;
     double P_ATM = pricer2.price(40.0).optionValue;
@@ -413,12 +311,10 @@ TEST_CASE("American put value is at least immediate exercise value", "[lsm_price
     const double S0 = 35.0;
     const double K = 40.0;
 
-    LSMPricer pricer(
-        std::make_unique<GeometricBrownianMotion>(0.06, 0.2),
-        std::make_unique<Put_payoff>(K),
-        makeTestBasis(),
-        config
-    );
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff(K);
+    auto basis = makeTestBasis();
+    LSMPricer pricer(process, payoff, basis, config);
 
     double price = pricer.price(S0).optionValue;
     double intrinsic = std::max(K - S0, 0.0);

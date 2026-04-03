@@ -32,21 +32,12 @@ namespace lsm {
      *
     ---------------------------------------------------------------------------------------------------*/
     LSMPricer::LSMPricer(
-    std::unique_ptr<const lsm::core::StochasticProcess> process,
-    std::unique_ptr<const lsm::core::OptionPayoff> payoff,
-    std::unique_ptr<lsm::core::BasisSet> basis,
+    const lsm::core::StochasticProcess& process,
+    const lsm::core::OptionPayoff& payoff,
+    const lsm::core::BasisSet& basis,
     const lsm::engine::LSMConfig& config)
-    : process(std::move(process)), payoff(std::move(payoff)), basis(std::move(basis)), config(config)
+    : process(process), payoff(payoff), basis(basis), config(config)
     {
-        if (!this->process) {
-            throw std::invalid_argument("LSMPricer received null process pointer");
-        }
-        if (!this->payoff) {
-            throw std::invalid_argument("LSMPricer received null payoff pointer");
-        }
-        if (!this->basis) {
-            throw std::invalid_argument("LSMPricer received null basis pointer");
-        }
     }
 
         // Define the function simulatePaths with return type as PathData
@@ -210,7 +201,7 @@ namespace lsm {
     // just the terminal payoff
 
     for (int i = 0; i < numPaths; i++){
-        cashflow[i] = payoff->payoff(data.paths[i][numTimes]);
+        cashflow[i] = payoff.payoff(data.paths[i][numTimes]);
         exerciseTime[i] = numTimes;
         data.cashFlows[i][numTimes] = cashflow[i];
     }
@@ -222,21 +213,21 @@ namespace lsm {
         std::vector<bool> itm(numPaths, false);
 
         for (int i = 0; i < numPaths; ++i){
-            double exerciseValue = payoff->payoff(data.paths[i][t]);
+            double exerciseValue = payoff.payoff(data.paths[i][t]);
             if (exerciseValue > 0.0) {
                 itm[i] = true;
             }
         }
 
         //Run Regression to estimate continuation coeffs
-        const double strike = payoff->strike();
+        const double strike = payoff.strike();
         std::vector<double> coeffs = lsm::engine::Ols_regression(
                 data.paths,
                 static_cast<std::size_t>(t),
                 cashflow,
                 itm,
                 discountFactor,
-                *basis,
+                basis,
                 strike
             );
 
@@ -246,7 +237,7 @@ namespace lsm {
                 continue;
             }
             double St = data.paths[i][t];
-            double exerciseValue = payoff->payoff(St);
+            double exerciseValue = payoff.payoff(St);
             double continuationValue = coeffs[i];
             if (exerciseValue > continuationValue){
                 cashflow[i] = exerciseValue;
@@ -337,7 +328,7 @@ namespace lsm {
     ---------------------------------------------------------------------------------------------------*/
     PathData LSMPricer::simulatePaths(double S0) const
     {
-        return lsm::engine::simulatePaths(S0, *process, config);
+        return lsm::engine::simulatePaths(S0, process, config);
     }
 
     SimulationResult LSMPricer::price(double S0) {
@@ -350,7 +341,7 @@ namespace lsm {
         const double totalDisc = std::exp(-config.riskFreeRate * config.maturity);
         double euSum = 0.0;
         for (int i = 0; i < N; ++i)
-            euSum += payoff -> payoff(data.paths[i][T]);
+            euSum += payoff.payoff(data.paths[i][T]);
         const double europeanValue = (euSum / N) * totalDisc;
 
         // backward induction returns per path PV at time 0
@@ -370,7 +361,7 @@ namespace lsm {
         const double totalDisc = std::exp(-config.riskFreeRate * config.maturity);
         double euSum = 0.0;
         for (int i = 0; i < N; ++i)
-            euSum += payoff -> payoff(data.paths[i][T]);
+            euSum += payoff.payoff(data.paths[i][T]);
         const double europeanValue = (euSum / N) * totalDisc;
 
         // backward induction returns per path PV at time 0

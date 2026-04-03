@@ -67,9 +67,9 @@ namespace lsm {
         // payoff, and basis objects into the class.
         
             LSMPricer(
-                std::unique_ptr<const lsm::core::StochasticProcess> process,
-                std::unique_ptr<const lsm::core::OptionPayoff> payoff,
-                std::unique_ptr<lsm::core::BasisSet> basis,
+                const lsm::core::StochasticProcess& process,
+                const lsm::core::OptionPayoff& payoff,
+                const lsm::core::BasisSet& basis,
                 const lsm::engine::LSMConfig& config);
                 
                 // Price the option from initial asset value S0
@@ -78,12 +78,10 @@ namespace lsm {
                 // Price the option and also return the generated path data.
                 std::pair<lsm::engine::SimulationResult, lsm::engine::PathData> priceWithData(double S0);
         private:
-            // Owned model components injected through abstract base-class pointers.
-            // unique_ptr provides exclusive ownership and automatic cleanup.
-            std::unique_ptr<const lsm::core::StochasticProcess> process;
-            std::unique_ptr<const lsm::core::OptionPayoff>      payoff;
-            std::unique_ptr<lsm::core::BasisSet>                basis;
 
+            const lsm::core::StochasticProcess& process;
+            const lsm::core::OptionPayoff& payoff;
+            const lsm::core::BasisSet& basis;
             // Numerical configuration stored by value.
             lsm::engine::LSMConfig config;
 

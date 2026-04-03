@@ -1,25 +1,60 @@
 #include <iostream>
+#include <fstream>
+#include <cmath>
+#include <memory>
 #include "convergence_analyser.hpp"
+#include "underlying_sde.hpp"
 
-void runAllConvergence(lsm::analysis::ConvergenceAnalyser& analyser, bool isLag, bool isCall) {
-    for (const std::string mode : {"order", "pathCount", "numExerciseDates"}) {
-        analyser.runConvergence(mode, isLag, isCall);
-    }
+// market parameters
+const double S0 = 36.0;
+const double K = 40.0;
+const double r = 0.06;
+const double sigma = 0.20;
+const double T = 1.0;
 
-    analyser.runSeedStability(isLag, isCall);
-}
+// fixed parameters used across convergence tests
+const int fixedPathCount = 10000;
+const int fixedOrder = 3;
+const int fixedNumDates = 50;
+const int fixedStockSteps = 1000; // for FD convergence
 
+// parameter lists to iterate over in each convergence test
+const std::vector<int> orders = {1, 2, 3, 4, 5};
+const std::vector<int> exerciseDates = {1, 5, 10, 20, 50, 100};
+const std::vector<int> fdTimeCounts = {10, 50, 100, 500, 1000, 5000, 10000, 40000};
+const std::vector<int> pathCounts = []() {
+    std::vector<int> v;
+    for (int i = 6; i <= 17; ++i) // Change the value of i to adjust the range of number of paths (from 2^6 to 2^17 )
+        v.push_back(static_cast<int>(std::pow(2.0, i)));
+    return v;
+}();
+
+// main function which goes through each type of convergence
 int main(){
-    lsm::analysis::ConvergenceAnalyser callAnalyser(36, 0.06, 0.2, 40, 1.0, true);
-    lsm::analysis::ConvergenceAnalyser putAnalyser(36, 0.06, 0.2, 40, 1.0, false);
 
-    putAnalyser.runBenchmark(false);
+    std::function<std::unique_ptr<lsm::core::StochasticProcess>(double, double)> sdeFactory =
+        [](double rate, double vol) {
+            return std::make_unique<lsm::core::GeometricBrownianMotion>(rate, vol);
+        };
 
-    for (bool isLag : {true, false})
-        runAllConvergence(callAnalyser, isLag, true);
+    lsm::core::Put_payoff put(K);
 
-    for (bool isLag : {true, false})
-        runAllConvergence(putAnalyser, isLag, false);
+    lsm::core::BasisSet basis;
+    basis.makeLaguerreSet(fixedOrder);
+
+    std::function<void(lsm::core::BasisSet&, int)> basisFactory = [](lsm::core::BasisSet& bs, int order) {
+        bs.makeLaguerreSet(order);
+    };
+
+    lsm::analysis::ConvergenceAnalyser analyser(S0, r, sigma, K, T, sdeFactory, put, basis, basisFactory, fixedOrder, fixedPathCount, fixedNumDates);
+
+    analyser.runBenchmark();
+
+    analyser.runPathConvergence(pathCounts);
+    analyser.runOrderConvergence(orders);
+    analyser.runDatesConvergence(exerciseDates);
+    analyser.runFDConvergence(fdTimeCounts, fixedStockSteps);
+    analyser.runSeedStability();
 
     return 0;
 }

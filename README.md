@@ -29,3 +29,10 @@ Three layers:
 - **`lsm::core`** - stochastic processes, payoffs, basis functions, RNG
 - **`lsm::engine`** - LSM algorithm: path simulation, backward induction, OLS regression
 - **`lsm::analysis`** - convergence studies and benchmarking via `ConvergenceAnalyser`
+
+> Why we chose Unicorn as a team name: Unicorn was a memorable mascot for our team project, while also being quick and easy to type in command terminals. The term is also used in the tech industry to denote fast-growing startups valued at over US$1 billion, a testament to the naive ambition and enthusiasm with which we began the project.
+
+
+<div align="center">
+  <img src="extern/catch2/unicorn cutout.png" alt="Unicorn Mascot" width="300">
+</div>

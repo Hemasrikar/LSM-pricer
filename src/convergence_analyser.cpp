@@ -8,82 +8,81 @@
 #include <fstream>
 #include <chrono>
 #include <cmath>
+#include <sstream>
 
 
 namespace lsm{
     namespace analysis{
 
         // initialise the class
-        ConvergenceAnalyser::ConvergenceAnalyser(double s, double rate, double vol, double strike, double maturity, bool call) 
-            : S0(s), r(rate), sigma(vol), K(strike), T(maturity), isCall(call) 
+        ConvergenceAnalyser::ConvergenceAnalyser(double s, double rate, double vol, double strike, double maturity,
+            std::function<std::unique_ptr<lsm::core::StochasticProcess>(double, double)> process,
+            const lsm::core::OptionPayoff& payoff,
+            const lsm::core::BasisSet& basis,
+            std::function<void(lsm::core::BasisSet&, int)> factory,
+            int order, int pathCount, int numDates)
+            : S0(s), r(rate), sigma(vol), K(strike), T(maturity), sdeFactory(std::move(process)), payoffType(payoff), basisType(basis), basisFactory(std::move(factory)), order(order), fixedPathCount(pathCount), fixedNumDates(numDates)
         {
-            
+
         }
+
+        // creat the string which will be appended to the end of the file name
+        std::string ConvergenceAnalyser::paramString() const {
+            std::ostringstream oss;
+            oss << "S" << S0
+                << "_K" << K
+                << "_r" << r
+                << "_sig" << sigma
+                << "_T" << T
+                // add name function to the payoff thingy
+                // << "_" << (payoffType.InTheMoney(K + 1.0) ? "call" : "put")
+                << "_" << basisType.basisPtrs()[1]->name()
+                << "_ord" << order
+                << "_dates" << fixedNumDates
+                << "_paths" << fixedPathCount;
+            return oss.str();
+        }
+
 
         // helper functions
         double ConvergenceAnalyser::getBSPrice() {
-            return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, isCall);
+            
+            // change to payoffType.name()
+            return bs_pricer::price_vanilla_option_european_bs(S0, r, sigma, K, T, payoffType.InTheMoney(K + 1.0));
         }
 
-        double ConvergenceAnalyser::getFDPrice(bool isCall) {
+        double ConvergenceAnalyser::getFDPrice() {
             lsm::core::GeometricBrownianMotion gbm(r, sigma);
-            if (isCall) {
-                lsm::core::Call_payoff payoff(K);
-                return lsm::fd::FDPricer(gbm, payoff).price(S0, T);
-            } else {
-                lsm::core::Put_payoff payoff(K);
-                return lsm::fd::FDPricer(gbm, payoff).price(S0, T);
-            }
+            return lsm::fd::FDPricer(gbm, payoffType).price(S0, T);
         }
 
-        double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths, bool isLag) {
-            lsm::engine::LSMConfig config; 
+        double ConvergenceAnalyser::getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths) {
+            lsm::engine::LSMConfig config;
             config.rngSeed = seed;
             config.numExerciseDates = numExerciseDates;
             config.numPaths = numPaths;
             config.riskFreeRate = r;
             config.maturity = T;
 
-            auto process = std::make_unique<lsm::core::GeometricBrownianMotion>(r, sigma);
-            std::unique_ptr<lsm::core::OptionPayoff> payoff;
-            if (isCall)
-                payoff = std::make_unique<lsm::core::Call_payoff>(K);
-            else
-                payoff = std::make_unique<lsm::core::Put_payoff>(K);
-            auto basis   = std::make_unique<lsm::core::BasisSet>();
+            lsm::core::BasisSet basis;
+            basisFactory(basis, order);
 
-            if (isLag == true){
-                basis->makeLaguerreSet(order);
-            }
-            else{
-                basis->makeMonomialSet(order);
-            }
-
-            lsm::engine::LSMPricer myPricer(std::move(process), std::move(payoff), std::move(basis), config);
-            auto result = myPricer.price(S0);
-
-            return result.optionValue;
+            auto process = sdeFactory(r, sigma);
+            lsm::engine::LSMPricer myPricer(*process, payoffType, basis, config);
+            return myPricer.price(S0).optionValue;
         }
 
-    // Code to run a one off check against BS
-    void ConvergenceAnalyser::runBenchmark(bool isCall) {
-        // save and restore original parameters so the benchmark loop doesn't corrupt state
+    // Benchmark: compares BS European, FD American, LSM American across parameter combinations
+    void ConvergenceAnalyser::runBenchmark() {
         const double origS0    = S0;
         const double origSigma = sigma;
         const double origT     = T;
 
-        // set up the parameter vectors for the benchmark test
-            std::vector<double> S0s   = {36, 38, 40, 42, 44};
-            std::vector<double> sigmas = {0.2, 0.4};
-            std::vector<double> Ts     = {1.0, 2.0};
+        std::vector<double> S0s    = {36, 40, 44};
+        std::vector<double> sigmas = {0.2, 0.4};
+        std::vector<double> Ts     = {1.0, 2.0};
 
-        std::string callDisp = isCall ? "Call" : "Put";
-        std::string title = " Benchmark  |  " + callDisp + " ";
-        std::string border(title.size() + 2, '=');
-        std::cout << "\n+" << border << "+\n"
-                  << "|  " << title << "  |\n"
-                  << "+" << border << "+\n\n";
-
+        std::cout << "\n--- Benchmark ---\n\n";
         std::cout << std::right
                   << std::setw(6)  << "S0"
                   << std::setw(7)  << "Sigma"
@@ -94,114 +93,113 @@ namespace lsm{
                   << std::setw(20) << "Early Ex. Premium" << "\n"
                   << std::string(80, '-') << "\n";
 
-            for (double s : S0s) {
-                for (double vol : sigmas) {
-                    for (double mat : Ts) {
+        std::ofstream out("csv_output/benchmark.csv");
+        out << "S0,Sigma,T,BSPrice,FDPrice,LSMPrice,EarlyExPremium\n";
 
-                        this->S0 = s;
-                        this->sigma = vol;
-                        this->T = mat;
+        for (double s : S0s) {
+            for (double vol : sigmas) {
+                for (double mat : Ts) {
 
-                        // get the black scholes, fd and lsm prices
-                        double bsPrice = getBSPrice();
-                        double fdPrice = getFDPrice(isCall);
-                        double lsmPrice = getLSMPrice(24, 50, 3, 100000, true);
+                    this->S0    = s;
+                    this->sigma = vol;
+                    this->T     = mat;
 
-                        // compute the premium you pay for having early exercise
-                        double eeValue = lsmPrice - bsPrice;
+                    // get the black scholes, fd and lsm prices
+                    double bsPrice  = getBSPrice();
+                    double fdPrice  = getFDPrice();
+                    double lsmPrice = getLSMPrice(24, fixedNumDates, order, fixedPathCount);
+                    
+                    // compute the premium you pay for having early exercise
+                    double eeValue  = lsmPrice - bsPrice;
 
-                        std::cout << std::right
-                            << std::setw(6)  << s
-                            << std::setw(7)  << vol
-                            << std::setw(5)  << mat
-                            << std::fixed << std::setprecision(4)
-                            << std::setw(14) << bsPrice
-                            << std::setw(14) << fdPrice
-                            << std::setw(14) << lsmPrice
-                            << std::setw(20) << eeValue
-                            << std::defaultfloat << "\n";
-                    }
+                    std::cout << std::right
+                        << std::setw(6)  << s
+                        << std::setw(7)  << vol
+                        << std::setw(5)  << mat
+                        << std::fixed << std::setprecision(4)
+                        << std::setw(14) << bsPrice
+                        << std::setw(14) << fdPrice
+                        << std::setw(14) << lsmPrice
+                        << std::setw(20) << eeValue
+                        << std::defaultfloat << "\n";
+
+                    out << s << "," << vol << "," << mat << ","
+                        << bsPrice << "," << fdPrice << "," << lsmPrice << "," << eeValue << "\n";
                 }
             }
+        }
+
+        out.close();
+        std::cout << "\n  -> Written to: csv_output/benchmark.csv\n";
 
         S0    = origS0;
         sigma = origSigma;
         T     = origT;
     }
 
-    void ConvergenceAnalyser::runConvergence(const std::string& mode, bool isLag, bool isCall) {
-        std::vector<int> list;
-        std::string name;
-        std::string filename;
+    void ConvergenceAnalyser::runPathConvergence(std::vector<int> pathCounts) {
+        std::string filename = "csv_output/path_convergence_" + paramString() + ".csv";
+        double fdPrice = getFDPrice();
 
-        std::string basisLabel = isLag ? "laguerre" : "monomial";
-        std::string basisDisp  = isLag ? "Laguerre" : "Monomial";
-        std::string callLabel  = isCall ? "call" : "put";
-        std::string callDisp   = isCall ? "Call" : "Put";
-
-        if (mode == "pathCount"){
-            list = {10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000};
-            name = "Number of Paths";
-            filename = "csv_output/" + callLabel + "_" + basisLabel + "_path_convergence.csv";
-        }
-        else if(mode == "order"){
-            list = {1, 2, 3, 4, 5};
-            name = "Order of Basis";
-            filename = "csv_output/" + callLabel + "_" + basisLabel + "_order_convergence.csv";
-        }
-        else if (mode == "numExerciseDates"){
-            list = {1, 5, 10, 20, 50, 100};
-            name = "Number of Exercise Dates";
-            filename = "csv_output/" + callLabel + "_" + basisLabel + "_exercise_dates_convergence.csv";
-        }
-
-        // set up the parameters for the convergence test
-        int numExerciseDates = 50;
-        int pathCount = 10000;
-        int order = 3;
-
-        double truePrice = getFDPrice(isCall);
-
-        // print box header
-        std::string title = " " + name + "  |  " + basisDisp + "  |  " + callDisp + " ";
-        std::string border(title.size() + 2, '=');
-        std::cout << "\n+" << border << "+\n"
-                  << "|  " << title << "  |\n"
-                  << "+" << border << "+\n\n";
-
-        // print column headers
+        // output the titles of the table to the terminal
+        std::cout << "\n--- Path Convergence ---\n\n";
         std::cout << std::fixed << std::setprecision(4);
         std::cout << std::right
-                  << std::setw(12) << name
+                  << std::setw(12) << "Paths"
                   << std::setw(13) << "LSM Price"
                   << std::setw(11) << "Error"
                   << std::setw(12) << "Time (ms)" << "\n"
                   << std::string(48, '-') << "\n";
 
         std::ofstream out(filename);
-        out << name << ",LSMPrice,TruePrice,Error,Time(ms)\n";
+        out << "Paths,LSMPrice,FDPrice,Error,Time(ms)\n";
 
-        for (int i : list){
-            double lsmPrice;
-
+        for (int i : pathCounts){
             auto start = std::chrono::high_resolution_clock::now();
-
-            if (mode == "pathCount")
-                lsmPrice = getLSMPrice(24, numExerciseDates, order, i, isLag);
-            else if (mode == "order")
-                lsmPrice = getLSMPrice(24, numExerciseDates, i, pathCount, isLag);
-            else if (mode == "numExerciseDates")
-                lsmPrice = getLSMPrice(24, i, order, pathCount, isLag);
-            else {
-                std::cout << "Incorrect mode" << std::endl;
-                break;
-            }
-
+            double lsmPrice = getLSMPrice(24, fixedNumDates, order, i);
             auto end = std::chrono::high_resolution_clock::now();
             double ms = std::chrono::duration<double, std::milli>(end - start).count();
 
-            double error = std::abs(truePrice - lsmPrice);
-            out << i << "," << lsmPrice << "," << truePrice << "," << error << "," << ms << "\n";
+            double error = std::abs(fdPrice - lsmPrice);
+            out << i << "," << lsmPrice << "," << fdPrice << "," << error << "," << ms << "\n";
+
+            // output the values
+            std::cout << std::setw(12) << i
+                      << std::setw(13) << lsmPrice
+                      << std::setw(11) << error
+                      << std::setw(11) << std::setprecision(2) << ms << " ms"
+                      << std::setprecision(4) << "\n";
+        }
+
+        out.close();
+        std::cout << "\n  -> Written to: " << filename << "\n";
+    }
+
+    void ConvergenceAnalyser::runOrderConvergence(std::vector<int> orders) {
+        std::string filename = "csv_output/order_convergence_" + paramString() + ".csv";
+        double fdPrice = getFDPrice();
+
+        // keep basis type in title since we run both basis types
+        std::cout << "\n--- Order Convergence | " << basisType.basisPtrs()[1]->name() << " ---\n\n";
+        std::cout << std::fixed << std::setprecision(4);
+        std::cout << std::right
+                  << std::setw(12) << "Order"
+                  << std::setw(13) << "LSM Price"
+                  << std::setw(11) << "Error"
+                  << std::setw(12) << "Time (ms)" << "\n"
+                  << std::string(48, '-') << "\n";
+
+        std::ofstream out(filename);
+        out << "Order,LSMPrice,FDPrice,Error,Time(ms)\n";
+
+        for (int i : orders){
+            auto start = std::chrono::high_resolution_clock::now();
+            double lsmPrice = getLSMPrice(24, fixedNumDates, i, fixedPathCount);
+            auto end = std::chrono::high_resolution_clock::now();
+            double ms = std::chrono::duration<double, std::milli>(end - start).count();
+
+            double error = std::abs(fdPrice - lsmPrice);
+            out << i << "," << lsmPrice << "," << fdPrice << "," << error << "," << ms << "\n";
 
             std::cout << std::setw(12) << i
                       << std::setw(13) << lsmPrice
@@ -214,29 +212,90 @@ namespace lsm{
         std::cout << "\n  -> Written to: " << filename << "\n";
     }
 
-    void ConvergenceAnalyser::runSeedStability(bool isLag, bool isCall) {
+    void ConvergenceAnalyser::runDatesConvergence(std::vector<int> exerciseDatesList) {
+        std::string filename = "csv_output/dates_convergence_" + paramString() + ".csv";
+        double fdPrice = getFDPrice();
+
+        // titles
+        std::cout << "\n--- Exercise Dates Convergence ---\n\n";
+        std::cout << std::fixed << std::setprecision(4);
+        std::cout << std::right
+                  << std::setw(12) << "Dates"
+                  << std::setw(13) << "LSM Price"
+                  << std::setw(11) << "Error"
+                  << std::setw(12) << "Time (ms)" << "\n"
+                  << std::string(48, '-') << "\n";
+
+        std::ofstream out(filename);
+        out << "ExerciseDates,LSMPrice,FDPrice,Error,Time(ms)\n";
+
+        for (int i : exerciseDatesList){
+            auto start = std::chrono::high_resolution_clock::now();
+            double lsmPrice = getLSMPrice(24, i, order, fixedPathCount);
+            auto end = std::chrono::high_resolution_clock::now();
+            double ms = std::chrono::duration<double, std::milli>(end - start).count();
+
+            double error = std::abs(fdPrice - lsmPrice);
+            out << i << "," << lsmPrice << "," << fdPrice << "," << error << "," << ms << "\n";
+
+            std::cout << std::setw(12) << i
+                      << std::setw(13) << lsmPrice
+                      << std::setw(11) << error
+                      << std::setw(11) << std::setprecision(2) << ms << " ms"
+                      << std::setprecision(4) << "\n";
+        }
+
+        out.close();
+        std::cout << "\n  -> Written to: " << filename << "\n";
+    }
+
+    void ConvergenceAnalyser::runFDConvergence(std::vector<int> timeCounts, int stockSteps) {
+        std::string filename = "csv_output/fd_convergence_" + paramString() + ".csv";
+        double bsPrice = getBSPrice();
+
+        // titles
+        std::cout << "\n--- FD Convergence ---\n\n";
+        std::cout << std::fixed << std::setprecision(4);
+        std::cout << std::right
+                  << std::setw(12) << "Time Steps"
+                  << std::setw(12) << "FD Price"
+                  << std::setw(11) << "Error"
+                  << std::setw(12) << "Time (ms)" << "\n"
+                  << std::string(48, '-') << "\n";
+
+        std::ofstream out(filename);
+        out << "TimeSteps,BSPrice,FDPrice,Error,Time(ms)\n";
+
+        // generate the stock price and the payoff with gbm
+        lsm::core::GeometricBrownianMotion gbm(r, sigma);
+
+        for (int timeSteps : timeCounts) {
+            auto start = std::chrono::high_resolution_clock::now();
+            double fdPrice = lsm::fd::FDPricer(gbm, payoffType, stockSteps, timeSteps).price(S0, T);
+            auto end = std::chrono::high_resolution_clock::now();
+            double ms = std::chrono::duration<double, std::milli>(end - start).count();
+
+            double error = std::abs(bsPrice - fdPrice);
+            out << timeSteps << "," << bsPrice << "," << fdPrice << "," << error << "," << ms << "\n";
+
+            std::cout << std::setw(12) << timeSteps
+                      << std::setw(12) << fdPrice
+                      << std::setw(11) << error
+                      << std::setw(11) << std::setprecision(2) << ms << " ms"
+                      << std::setprecision(4) << "\n";
+        }
+
+        out.close();
+        std::cout << "\n  -> Written to: " << filename << "\n";
+    }
+
+    void ConvergenceAnalyser::runSeedStability() {
         std::vector<int> seeds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        std::string filename = "csv_output/seed_stability_" + paramString() + ".csv";
 
-        std::string basisLabel = isLag ? "laguerre" : "monomial";
-        std::string basisDisp  = isLag ? "Laguerre" : "Monomial";
-        std::string callLabel  = isCall ? "call" : "put";
-        std::string callDisp   = isCall ? "Call" : "Put";
-        std::string filename   = "csv_output/" + callLabel + "_" + basisLabel + "_seed_stability.csv";
+        double fdPrice = getFDPrice();
 
-        int numExerciseDates = 50;
-        int pathCount        = 10000;
-        int order            = 3;
-
-        double truePrice = getFDPrice(isCall);
-
-        // print box header
-        std::string title = " Seed Stability  |  " + basisDisp + "  |  " + callDisp + " ";
-        std::string border(title.size() + 2, '=');
-        std::cout << "\n+" << border << "+\n"
-                  << "|  " << title << "  |\n"
-                  << "+" << border << "+\n\n";
-
-        // print column headers
+        std::cout << "\n--- Seed Stability ---\n\n";
         std::cout << std::fixed << std::setprecision(4);
         std::cout << std::right
                   << std::setw(6)  << "Seed"
@@ -246,19 +305,19 @@ namespace lsm{
                   << std::string(42, '-') << "\n";
 
         std::ofstream out(filename);
-        out << "Seed,LSMPrice,TruePrice,Error,Time(ms)\n";
+        out << "Seed,LSMPrice,FDPrice,Error,Time(ms)\n";
 
         std::vector<double> prices;
 
         for (int seed : seeds) {
             auto start      = std::chrono::high_resolution_clock::now();
-            double lsmPrice = getLSMPrice(seed, numExerciseDates, order, pathCount, isLag);
+            double lsmPrice = getLSMPrice(seed, fixedNumDates, order, fixedPathCount);
             auto end        = std::chrono::high_resolution_clock::now();
             double ms       = std::chrono::duration<double, std::milli>(end - start).count();
 
-            double error = std::abs(truePrice - lsmPrice);
+            double error = std::abs(fdPrice - lsmPrice);
             prices.push_back(lsmPrice);
-            out << seed << "," << lsmPrice << "," << truePrice << "," << error << "," << ms << "\n";
+            out << seed << "," << lsmPrice << "," << fdPrice << "," << error << "," << ms << "\n";
 
             std::cout << std::setw(6)  << seed
                       << std::setw(13) << lsmPrice

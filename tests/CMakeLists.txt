@@ -1,37 +1,31 @@
-add_executable(my_test ${SRC_FILES} my_test.cpp)
-target_include_directories(my_test PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
-add_test(NAME my_test COMMAND my_test)
-target_include_directories(my_test PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
 
-# Tests for Basis Functions
-add_executable(BasisFunctions_test ${SRC_FILES} test_basis_functions.cpp)
-target_include_directories(BasisFunctions_test PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
-add_test(NAME BasisFunctions_test COMMAND BasisFunctions_test)
-target_include_directories(BasisFunctions_test PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
-
-# Added the executable for the black scholes pricing test
-add_executable(test_bs_pricer ${SRC_FILES} test_bs_pricer.cpp)
-target_include_directories(test_bs_pricer PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
-target_include_directories(test_bs_pricer PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
-add_test(NAME test_bs_pricer COMMAND test_bs_pricer)
+# To avoids code duplication and makes it easy to add new tests
+function(add_lsm_test test_name test_source)
+    # Create an executable from the test source file
+    add_executable(${test_name} ${test_source})
+    
+    # Include the Catch2 header-only library for testing framework
+    target_include_directories(${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/extern/catch2)
+    
+    # Link LSM project files
+    target_link_libraries(${test_name} PRIVATE lsm_core)
+    
+    add_test(NAME ${test_name} COMMAND ${test_name})
+endfunction()
 
 
-add_executable(test_convergence_analyser ${SRC_FILES} test_convergence_analyser.cpp)
-target_include_directories(test_convergence_analyser PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
-target_include_directories(test_convergence_analyser PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
-add_test(NAME test_convergence_analyser COMMAND test_convergence_analyser)
+# Tests for the main files of the LSM pricer
 
-add_executable(finite_difference_tests ${SRC_FILES} finite_difference_tests.cpp)
-target_include_directories(finite_difference_tests PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
-target_include_directories(finite_difference_tests PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
-add_test(NAME finite_difference_tests COMMAND finite_difference_tests)
+add_lsm_test(OLS_regression_test test_OLS_regression.cpp)
+add_lsm_test(BasisFunctions_test test_basis_functions.cpp)
+add_lsm_test(OptionPayoff_test test_option_payoff.cpp)
+add_lsm_test(finite_difference_tests finite_difference_tests.cpp)
 
-add_executable(test_lsm_pricer ${SRC_FILES} test_lsm_pricer.cpp)
-target_include_directories(test_lsm_pricer PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
-target_include_directories(test_lsm_pricer PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
-add_test(NAME test_lsm_pricer COMMAND test_lsm_pricer)
 
-add_executable(test_underlying_sde ${SRC_FILES} test_underlying_sde.cpp)
-target_include_directories(test_underlying_sde PUBLIC ${CMAKE_SOURCE_DIR}/extern/catch2 ${CMAKE_SOURCE_DIR}/src)
-target_include_directories(test_underlying_sde PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/eigen/5.0.1/include/eigen3)
-add_test(NAME test_underlying_sde COMMAND test_underlying_sde)
+# Tests for Black-Scholes and LSM Monte Carlo
+add_lsm_test(test_bs_pricer test_bs_pricer.cpp)
+add_lsm_test(test_lsm_pricer test_lsm_pricer.cpp)
+
+# Tests for the underlying SDE and convergence analysis tools
+add_lsm_test(test_underlying_sde test_underlying_sde.cpp)
+add_lsm_test(test_convergence_analyser test_convergence_analyser.cpp)
