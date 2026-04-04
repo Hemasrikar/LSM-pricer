@@ -217,6 +217,12 @@ TEST_CASE("BasisSet: can rebuild after clear", "[BasisSet]") {
 
 // Polymorphism via BasisFunction interface
 
+TEST_CASE("MonomialBasis: name formatting", "[MonomialBasis]") {
+    REQUIRE(MonomialBasis(0).name() == "x^0");
+    REQUIRE(MonomialBasis(1).name() == "x^1");
+    REQUIRE(MonomialBasis(3).name() == "x^3");
+}
+
 TEST_CASE("BasisFunction interface: virtual dispatch works for all concrete types", "[polymorphism]") {
     std::vector<std::unique_ptr<BasisFunction>> funcs;
     funcs.push_back(std::make_unique<ConstantBasis>());

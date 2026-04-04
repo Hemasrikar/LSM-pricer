@@ -298,6 +298,31 @@ TEST_CASE("Put option value is highest deep in the money and lowest out of the m
     REQUIRE(P_ATM >= P_OTM);
 }
 
+//TEST: simulatePaths rejects non-positive numExerciseDates and numPaths
+TEST_CASE("LSMPricer rejects invalid config in simulatePaths", "[lsm_pricer]") {
+    GeometricBrownianMotion process(0.06, 0.2);
+    Put_payoff payoff(40.0);
+    auto basis = makeTestBasis();
+
+    LSMConfig config;
+    config.numPaths = 100;
+    config.useAntithetic = false;
+    config.numExerciseDates = 10;
+    config.maturity = 1.0;
+    config.riskFreeRate = 0.06;
+    config.rngSeed = 24;
+
+    LSMConfig bad = config;
+    bad.numExerciseDates = 0;
+    LSMPricer pricer1(process, payoff, basis, bad);
+    REQUIRE_THROWS_AS(pricer1.price(40.0), std::invalid_argument);
+
+    bad = config;
+    bad.numPaths = 0;
+    LSMPricer pricer2(process, payoff, basis, bad);
+    REQUIRE_THROWS_AS(pricer2.price(40.0), std::invalid_argument);
+}
+
 //TEST 10: Imediate exercise lower bound: V^AM(S0) >= (K - S0)+
 TEST_CASE("American put value is at least immediate exercise value", "[lsm_pricer]") {
     LSMConfig config;

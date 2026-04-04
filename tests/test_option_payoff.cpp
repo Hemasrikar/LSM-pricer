@@ -46,3 +46,12 @@ TEST_CASE("Call_payoff InTheMoney works correctly", "[Call_payoff]")
     REQUIRE(call.InTheMoney(100.1) == true);
     REQUIRE(call.InTheMoney(150.0) == true);
 }
+
+TEST_CASE("OptionPayoff virtual destructor via base pointer", "[option_payoff]") {
+    // Exercises the virtual ~OptionPayoff() path
+    std::unique_ptr<OptionPayoff> put  = std::make_unique<Put_payoff>(100.0);
+    std::unique_ptr<OptionPayoff> call = std::make_unique<Call_payoff>(100.0);
+    CHECK(put->strike()  == 100.0);
+    CHECK(call->strike() == 100.0);
+    // both destroyed here
+}
