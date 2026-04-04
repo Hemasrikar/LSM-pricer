@@ -19,7 +19,7 @@ endfunction()
 add_lsm_test(OLS_regression_test test_OLS_regression.cpp)
 add_lsm_test(BasisFunctions_test test_basis_functions.cpp)
 add_lsm_test(OptionPayoff_test test_option_payoff.cpp)
-add_lsm_test(finite_difference_tests finite_difference_tests.cpp)
+add_lsm_test(finite_difference_tests test_finite_difference.cpp)
 
 
 # Tests for Black-Scholes and LSM Monte Carlo
