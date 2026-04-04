@@ -167,7 +167,7 @@ TEST_CASE("runBenchmark CSV has 12 data rows", "[convergence]") {
 
 
 // ============================================ runPathConvergence() tests ============================================
-static const std::string pathConvFile = "csv_output/path_convergence_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L1_ord3_dates50_paths10000.csv";
+static const std::string pathConvFile = "csv_output/path_convergence_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L0_ord3_dates50_paths10000.csv";
 
 // CSV file is created
 TEST_CASE("runPathConvergence creates CSV file", "[convergence]") {
@@ -193,7 +193,7 @@ TEST_CASE("runPathConvergence CSV has correct number of rows", "[convergence]") 
 
 
 // ============================================ runDatesConvergence() tests ============================================
-static const std::string datesConvFile = "csv_output/dates_convergence_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L1_ord3_dates50_paths10000.csv";
+static const std::string datesConvFile = "csv_output/dates_convergence_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L0_ord3_dates50_paths10000.csv";
 
 // CSV file is created
 TEST_CASE("runDatesConvergence creates CSV file", "[convergence]") {
@@ -219,7 +219,7 @@ TEST_CASE("runDatesConvergence CSV has correct number of rows", "[convergence]")
 
 
 // ============================================ runOrderConvergence() tests ============================================
-static const std::string orderConvFile = "csv_output/order_convergence_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L1_ord3_dates50_paths10000.csv";
+static const std::string orderConvFile = "csv_output/order_convergence_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L0_ord3_dates50_paths10000.csv";
 
 // CSV file is created
 TEST_CASE("runOrderConvergence creates CSV file", "[convergence]") {
@@ -245,7 +245,7 @@ TEST_CASE("runOrderConvergence CSV has correct number of rows", "[convergence]")
 
 
 // ============================================ runFDConvergence() tests ============================================
-static const std::string fdConvFile = "csv_output/fd_convergence_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L1_ord3_dates50_paths10000.csv";
+static const std::string fdConvFile = "csv_output/fd_convergence_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L0_ord3_dates50_paths10000.csv";
 
 // CSV file is created
 TEST_CASE("runFDConvergence creates CSV file", "[convergence]") {
@@ -271,7 +271,7 @@ TEST_CASE("runFDConvergence CSV has correct number of rows", "[convergence]") {
 
 
 // ============================================ runSeedStability() tests ============================================
-static const std::string seedFile = "csv_output/seed_stability_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L1_ord3_dates50_paths10000.csv";
+static const std::string seedFile = "csv_output/seed_stability_S100_K100_r0.05_sig0.2_T1_put_Laguerre_L0_ord3_dates50_paths10000.csv";
 
 // CSV file is created
 TEST_CASE("runSeedStability creates CSV file", "[convergence]") {
