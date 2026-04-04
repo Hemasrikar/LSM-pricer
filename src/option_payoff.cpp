@@ -31,6 +31,8 @@ namespace lsm {
             return S < K;
         }
 
+        std::string Put_payoff::name() const { return "Put"; }
+
 
 // Call_payoff implementations
 
@@ -49,6 +51,8 @@ namespace lsm {
         {
             return S > K;
         }
+
+        std::string Call_payoff::name() const { return "Call"; }
 
     } //namespace core
 } //namespace lsm

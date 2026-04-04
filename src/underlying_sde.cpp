@@ -111,6 +111,9 @@ GeometricBrownianMotion::GeometricBrownianMotion(double r, double sigma)
  *  for consistency with the common interface and with models such as jump we requre
  *  additional random draws.
 ---------------------------------------------------------------------------------------------------*/
+std::string GeometricBrownianMotion::name() const { return "GBM"; }
+
+
 double GeometricBrownianMotion::stepWithNormal(double s, double dt, double z,RNG& /*rng*/) const {
     if (dt <= 0.0) {
         throw std::invalid_argument("GeometricBrownianMotion::step: dt must be positive.");
@@ -167,6 +170,9 @@ JumpDiffusionProcess::JumpDiffusionProcess(double r, double sigma, double lambda
  * The state S = 0 is absorbing: once reached, it remains zero.
  *
 ---------------------------------------------------------------------------------------------------*/
+std::string JumpDiffusionProcess::name() const { return "JumpDiffusion"; }
+
+
 double JumpDiffusionProcess::step(double s, double dt, RNG& rng) const {
     if (s < 0.0) {
         // FIX: negative price is a logic error, not a valid absorbing state

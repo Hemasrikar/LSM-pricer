@@ -1,5 +1,5 @@
 #pragma once
-
+#include <string>
 
 namespace lsm {
     namespace core {
@@ -17,6 +17,7 @@ namespace lsm {
             double strike() const { return K; }
             virtual double payoff(double S) const = 0;
             virtual bool InTheMoney(double S) const = 0;
+            virtual std::string name() const = 0;
         };
 
 
@@ -26,8 +27,9 @@ namespace lsm {
         public:
             Put_payoff(double strike);
 
-            double payoff(double S) const;
-            bool InTheMoney(double S) const;
+            double payoff(double S) const override;
+            bool InTheMoney(double S) const override;
+            std::string name() const override;
         };
 
 
@@ -37,8 +39,9 @@ namespace lsm {
         public:
             Call_payoff(double strike);
 
-            double payoff(double S) const;
-            bool InTheMoney(double S) const;
+            double payoff(double S) const override;
+            bool InTheMoney(double S) const override;
+            std::string name() const override;
         };
 
     } //namespace core

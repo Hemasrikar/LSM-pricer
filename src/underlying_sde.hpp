@@ -30,6 +30,8 @@ class StochasticProcess {
         virtual double stepWithNormal(double s, double dt, double z, RNG& rng) const = 0;
         // Advance the process by one time step.
         virtual double step(double s, double dt, RNG& rng) const;
+        //Name of the process (e.g. "GBM", "JumpDiffusion"))
+        virtual std::string name() const = 0;
 
          // Simulate a path of length n+1 over [0, T], starting from S0.
         std::vector<double> simulatePath(double S0, double T, std::size_t n, RNG& rng) const;
@@ -43,6 +45,8 @@ public:
 
     // Exact solution: S_{t+dt} = S_t exp((r - sigma^2/2)dt + sigma sqrt(dt) z)
     double stepWithNormal(double s, double dt, double z, RNG& /*rng*/ ) const override;
+
+    std::string name() const override;
 
     double r() const { return r_; }
 
@@ -61,9 +65,10 @@ public:
 
     //antithetic step: z drives diffusion; jump detection uses the rng
     double stepWithNormal(double s, double dt, double z, RNG& rng) const override;
-    
+
     //full step: draws z for diffusion and u for jump
     double step(double s, double dt, RNG& rng) const override;
+    std::string name() const override;
 
     // Drift parameter
     double r() const { return r_; }

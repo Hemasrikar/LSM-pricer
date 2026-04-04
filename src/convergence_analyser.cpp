@@ -34,7 +34,7 @@ namespace lsm{
                 << "_r" << r
                 << "_sig" << sigma
                 << "_T" << T
-                << "_" << (payoffType.InTheMoney(K + 1.0) ? "call" : "put")
+                << "_" << payoffType.name()
                 << "_" << basisType.basisPtrs()[1]->name()
                 << "_ord" << order
                 << "_dates" << fixedNumDates
