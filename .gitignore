@@ -1,5 +1,6 @@
 build/
 output/
+.cache/
 .vscode/settings.json
 tests/IO/*
 !tests/IO/*output*
