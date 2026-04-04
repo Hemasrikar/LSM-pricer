@@ -222,3 +222,51 @@ TEST_CASE("simulatePath is deterministic when sigma is zero", "[underlying_sde]"
         REQUIRE(path[i] == Approx(expected));
     }
 }
+
+//TEST 18: JumpDiffusionProcess getters return constructed values
+TEST_CASE("JumpDiffusionProcess getters return constructed values", "[underlying_sde]") {
+    JumpDiffusionProcess process(0.05, 0.2, 0.3);
+    REQUIRE(process.r()      == Approx(0.05));
+    REQUIRE(process.sigma()  == Approx(0.2));
+    REQUIRE(process.lambda() == Approx(0.3));
+}
+
+//TEST 19: GeometricBrownianMotion getters return constructed values
+TEST_CASE("GeometricBrownianMotion getters return constructed values", "[underlying_sde]") {
+    GeometricBrownianMotion gbm(0.05, 0.2);
+    REQUIRE(gbm.r()     == Approx(0.05));
+    REQUIRE(gbm.sigma() == Approx(0.2));
+}
+
+//TEST 20: JumpDiffusionProcess step executes diffusion path for valid inputs
+TEST_CASE("JumpDiffusionProcess step returns positive value for valid inputs with no jumps", "[underlying_sde]") {
+    // lambda = 0 => no jumps, so step must equal the GBM exact formula
+    const double r      = 0.05;
+    const double sigma  = 0.2;
+    const double lambda = 0.0;
+    const double s      = 100.0;
+    const double dt     = 0.25;
+
+    JumpDiffusionProcess process(r, sigma, lambda);
+    RNG rng(42);
+
+    double result = process.step(s, dt, rng);
+    REQUIRE(result > 0.0);
+}
+
+//TEST 22: JumpDiffusionProcess step returns zero when jump almost surely occurs
+TEST_CASE("JumpDiffusionProcess step returns zero when jump probability is effectively one", "[underlying_sde]") {
+    // lambda = 1000 => p_jump ≈ 1, so the jump branch (return 0) is almost certainly hit
+    JumpDiffusionProcess process(0.05, 0.2, 1000.0);
+    RNG rng(42);
+
+    double result = process.step(100.0, 1.0, rng);
+    REQUIRE(result == Approx(0.0));
+}
+
+//TEST 21: RNG default constructor (no seed) produces valid normal samples
+TEST_CASE("RNG default constructor produces finite normal samples", "[underlying_sde]") {
+    RNG rng;
+    double sample = rng.normal();
+    REQUIRE(std::isfinite(sample));
+}
