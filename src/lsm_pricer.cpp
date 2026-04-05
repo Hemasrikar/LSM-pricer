@@ -191,16 +191,12 @@ namespace lsm {
     //stores payoff for each path
     std::vector<double> cashflow(numPaths);
 
-    //stores exercise time for each path
-    std::vector<int> exerciseTime(numPaths);
-
     //initialise the maturity payoff
     // At maturity there is no continuation decision left, so the payoff is
     // just the terminal payoff
 
     for (int i = 0; i < numPaths; i++){
         cashflow[i] = payoff.payoff(data.paths[i][numTimes]);
-        exerciseTime[i] = numTimes;
         data.cashFlows[i][numTimes] = cashflow[i];
     }
 
@@ -216,9 +212,9 @@ namespace lsm {
                 itm[i] = true;
             }
         }
-
         //Run Regression to estimate continuation coeffs
         const double strike = payoff.strike();
+        
         std::vector<double> coeffs = lsm::engine::Ols_regression(
                 data.paths,
                 static_cast<std::size_t>(t),
@@ -231,28 +227,28 @@ namespace lsm {
 
         //compare execise value with continuation value
         for (int i = 0; i < numPaths; ++i){
-            if(!itm[i]){
-                continue;
-            }
             double St = data.paths[i][t];
             double exerciseValue = payoff.payoff(St);
             double continuationValue = coeffs[i];
-            if (exerciseValue > continuationValue){
+            if (itm[i] && exerciseValue > continuationValue){
                 cashflow[i] = exerciseValue;
-                exerciseTime[i] = t;
                 data.cashFlows[i][t] = exerciseValue;
 
                 for(int s= t+1; s<= numTimes; ++s){
                     data.cashFlows[i][s] = 0.0;
                 }
             }
+            else{
+                cashflow[i] = cashflow[i]*discountFactor;
+                data.cashFlows[i][t] = cashflow[i];
+            }
         }
         }  
         std::vector<double> presentValue(numPaths, 0.0);
-        //find present value
-        for(int i = 0; i < numPaths; ++i){
-            presentValue[i] = cashflow[i] * std::exp(-config.riskFreeRate*dt*exerciseTime[i]);
-        }
+        //find present value: // cashflow is now the time-1 value, so discount once more to time 0
+        for (int i = 0; i < numPaths; ++i) {
+        presentValue[i] = discountFactor * cashflow[i];
+        }   
         return presentValue;
     }
     /*-------------------------------------------------------------------------------------------------
