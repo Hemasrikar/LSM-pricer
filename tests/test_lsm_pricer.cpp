@@ -19,15 +19,24 @@ static BasisSet makeTestBasis() {
     return basis;
 }
 
-//Test 1: check if priceWithData() returns correctly shaped paths
-TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pricer]") {
+static LSMConfig makeDefaultConfig() {
     LSMConfig config;
-    config.numPaths = 100;
-    config.useAntithetic = false;
-    config.numExerciseDates = 10;
+    config.numPaths = 5000;
+    config.useAntithetic = true;
+    config.numExerciseDates = 50;
     config.maturity = 1.0;
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
+    return config;
+}
+
+//Test 1: check if priceWithData() returns correctly shaped paths
+TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pricer]") {
+    
+    LSMConfig config = makeDefaultConfig();
+    config.useAntithetic = false;
+    config.numPaths = 100;
+    config.numExerciseDates = 10;
 
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
@@ -61,14 +70,9 @@ TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pr
 //variation reduction
 
 TEST_CASE("LSMPricer enforces even number of paths when using antithetic variates", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 101;              // odd number
-    config.useAntithetic = true;
+    LSMConfig config = makeDefaultConfig();
+    config.numPaths = 101;   
     config.numExerciseDates = 10;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -88,14 +92,9 @@ TEST_CASE("LSMPricer enforces even number of paths when using antithetic variate
 //TEST 3: Check whether LSM returns finite and consistent results
 
 TEST_CASE("LSMPricer returns finite and consistent results", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 2000;          // large to ensure stability
-    config.useAntithetic = true;
-    config.numExerciseDates = 20;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
+    config.numPaths = 2000; //ensures stability
+    config.numExerciseDates = 20; 
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -130,14 +129,7 @@ TEST_CASE("LSMPricer returns finite and consistent results", "[lsm_pricer]") {
 
 //TEST 4: American put has to be at least European value
 TEST_CASE("American put value is at least European value", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -152,13 +144,8 @@ TEST_CASE("American put value is at least European value", "[lsm_pricer]") {
 
 //TEST 5: Put value decreases as spot increases, i.e., S1 < S2 -> P(S1) >= P(S2)
 TEST_CASE("Put option value decreases as spot increases", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
+
+    LSMConfig config = makeDefaultConfig();
 
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
@@ -189,13 +176,9 @@ TEST_CASE("LSM price is close to finite difference benchmark", "[lsm_pricer]") {
     const double T  = 1.0;
 
     // --- LSM config ---
-    LSMConfig config;
-    config.numPaths = 10000;          // higher for stability
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
+    LSMConfig config = makeDefaultConfig();
+    config.numPaths = 10000; 
     config.maturity = T;
-    config.riskFreeRate = r;
-    config.rngSeed = 24;
 
     // --- LSM pricer ---
     GeometricBrownianMotion lsm_process(r, sigma);
@@ -218,14 +201,8 @@ TEST_CASE("LSM price is close to finite difference benchmark", "[lsm_pricer]") {
 
 //TEST 7: Put increases as strike increases
 TEST_CASE("Put option value increases as strike increases", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
 
+    LSMConfig config = makeDefaultConfig();
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff35(35.0), payoff40(40.0), payoff45(45.0);
     auto basis = makeTestBasis();
@@ -246,14 +223,7 @@ TEST_CASE("Put option value increases as strike increases", "[lsm_pricer]") {
 
 //TEST 8: Put value increases as volatility increases
 TEST_CASE("Put option value increases as volatility increases", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
     GeometricBrownianMotion proc15(0.06, 0.15), proc25(0.06, 0.25), proc35(0.06, 0.35);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -274,14 +244,7 @@ TEST_CASE("Put option value increases as volatility increases", "[lsm_pricer]") 
 
 //TEST 9: we require: DEEP ITM > ATM > OTM  - related to spot monotonicity
 TEST_CASE("Put option value is highest deep in the money and lowest out of the money", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -300,14 +263,7 @@ TEST_CASE("Put option value is highest deep in the money and lowest out of the m
 
 //TEST 10: Imediate exercise lower bound: V^AM(S0) >= (K - S0)+
 TEST_CASE("American put value is at least immediate exercise value", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
     const double S0 = 35.0;
     const double K = 40.0;
 
@@ -324,21 +280,19 @@ TEST_CASE("American put value is at least immediate exercise value", "[lsm_price
 
 //TEST CASE 11: test to check toy example. The price and path values are checked.
 TEST_CASE("LSM reproduces Longstaff-Schwartz 8-path toy example", "[lsm_pricer][toy_example]") {
-    LSMConfig config;
+    LSMConfig config = makeDefaultConfig();
+    config.numExerciseDates = 3;
     config.numPaths = 8;
     config.useAntithetic = false;
-    config.numExerciseDates = 3;
-    config.maturity = 3.0;          // three exercise dates: t=1,2,3
+    config.maturity = 3.0;
     config.riskFreeRate = 0.06;
-
     Put_payoff payoff(1.10);
 
     BasisSet basis;
     basis.makeMonomialSet(2); // constant, x, x^2
 
     GeometricBrownianMotion process(0.06, 0.2); 
-    // process is irrelevant here if we override paths manually
-
+   // process is unused once the test paths are supplied directly
     LSMPricer pricer(process, payoff, basis, config);
 
     PathData data;
