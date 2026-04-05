@@ -321,3 +321,56 @@ TEST_CASE("American put value is at least immediate exercise value", "[lsm_price
 
     REQUIRE(price >= intrinsic);
 }
+
+//TEST CASE 11: test to check toy example. The price and path values are checked.
+TEST_CASE("LSM reproduces Longstaff-Schwartz 8-path toy example", "[lsm_pricer][toy_example]") {
+    LSMConfig config;
+    config.numPaths = 8;
+    config.useAntithetic = false;
+    config.numExerciseDates = 3;
+    config.maturity = 3.0;          // three exercise dates: t=1,2,3
+    config.riskFreeRate = 0.06;
+
+    Put_payoff payoff(1.10);
+
+    BasisSet basis;
+    basis.makeMonomialSet(2); // constant, x, x^2
+
+    GeometricBrownianMotion process(0.06, 0.2); 
+    // process is irrelevant here if we override paths manually
+
+    LSMPricer pricer(process, payoff, basis, config);
+
+    PathData data;
+    data.numPaths = 8;
+    data.numTimeSteps = 3;
+    data.paths = {
+        {1.00, 1.09, 1.08, 1.34},
+        {1.00, 1.16, 1.26, 1.54},
+        {1.00, 1.22, 1.07, 1.03},
+        {1.00, 0.93, 0.97, 0.92},
+        {1.00, 1.11, 1.56, 1.52},
+        {1.00, 0.76, 0.77, 0.90},
+        {1.00, 0.92, 0.84, 1.01},
+        {1.00, 0.88, 1.22, 1.34}
+    };
+    data.cashFlows = std::vector<std::vector<double>>(8, std::vector<double>(4, 0.0));
+
+    std::vector<double> pv = pricer.runBackwardInductionForTest(data);
+
+    double price = 0.0;
+    for (double x : pv) price += x;
+    price /= pv.size();
+    //the paper rounds this to 4 s.f. so we choose a margin of 1e-4
+    REQUIRE(price == Approx(0.1144).margin(1e-4));
+
+    // check final cashflow matrix implied by the paper
+    REQUIRE(data.cashFlows[0][1] == Approx(0.0));
+    REQUIRE(data.cashFlows[1][1] == Approx(0.0));
+    REQUIRE(data.cashFlows[2][3] == Approx(0.07).margin(1e-8));
+    REQUIRE(data.cashFlows[3][1] == Approx(0.17).margin(1e-8));
+    REQUIRE(data.cashFlows[4][1] == Approx(0.0));
+    REQUIRE(data.cashFlows[5][1] == Approx(0.34).margin(1e-8));
+    REQUIRE(data.cashFlows[6][1] == Approx(0.18).margin(1e-8));
+    REQUIRE(data.cashFlows[7][1] == Approx(0.22).margin(1e-8));
+}
