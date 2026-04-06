@@ -240,7 +240,7 @@ namespace lsm {
             }
             else{
                 cashflow[i] = cashflow[i]*discountFactor;
-                data.cashFlows[i][t] = cashflow[i];
+                data.cashFlows[i][t] = 0;
             }
         }
         }  
