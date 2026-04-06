@@ -19,15 +19,24 @@ static BasisSet makeTestBasis() {
     return basis;
 }
 
-//Test 1: check if priceWithData() returns correctly shaped paths
-TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pricer]") {
+static LSMConfig makeDefaultConfig() {
     LSMConfig config;
-    config.numPaths = 100;
-    config.useAntithetic = false;
-    config.numExerciseDates = 10;
+    config.numPaths = 5000;
+    config.useAntithetic = true;
+    config.numExerciseDates = 50;
     config.maturity = 1.0;
     config.riskFreeRate = 0.06;
     config.rngSeed = 24;
+    return config;
+}
+
+//Test 1: check if priceWithData() returns correctly shaped paths
+TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pricer]") {
+    
+    LSMConfig config = makeDefaultConfig();
+    config.useAntithetic = false;
+    config.numPaths = 100;
+    config.numExerciseDates = 10;
 
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
@@ -61,14 +70,9 @@ TEST_CASE("LSMPricer priceWithData returns correctly shaped path data", "[lsm_pr
 //variation reduction
 
 TEST_CASE("LSMPricer enforces even number of paths when using antithetic variates", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 101;              // odd number
-    config.useAntithetic = true;
+    LSMConfig config = makeDefaultConfig();
+    config.numPaths = 101;   
     config.numExerciseDates = 10;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -88,14 +92,9 @@ TEST_CASE("LSMPricer enforces even number of paths when using antithetic variate
 //TEST 3: Check whether LSM returns finite and consistent results
 
 TEST_CASE("LSMPricer returns finite and consistent results", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 2000;          // large to ensure stability
-    config.useAntithetic = true;
-    config.numExerciseDates = 20;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
+    config.numPaths = 2000; //ensures stability
+    config.numExerciseDates = 20; 
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -130,14 +129,7 @@ TEST_CASE("LSMPricer returns finite and consistent results", "[lsm_pricer]") {
 
 //TEST 4: American put has to be at least European value
 TEST_CASE("American put value is at least European value", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -152,13 +144,8 @@ TEST_CASE("American put value is at least European value", "[lsm_pricer]") {
 
 //TEST 5: Put value decreases as spot increases, i.e., S1 < S2 -> P(S1) >= P(S2)
 TEST_CASE("Put option value decreases as spot increases", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
+
+    LSMConfig config = makeDefaultConfig();
 
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
@@ -189,13 +176,9 @@ TEST_CASE("LSM price is close to finite difference benchmark", "[lsm_pricer]") {
     const double T  = 1.0;
 
     // --- LSM config ---
-    LSMConfig config;
-    config.numPaths = 10000;          // higher for stability
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
+    LSMConfig config = makeDefaultConfig();
+    config.numPaths = 10000; 
     config.maturity = T;
-    config.riskFreeRate = r;
-    config.rngSeed = 24;
 
     // --- LSM pricer ---
     GeometricBrownianMotion lsm_process(r, sigma);
@@ -218,14 +201,8 @@ TEST_CASE("LSM price is close to finite difference benchmark", "[lsm_pricer]") {
 
 //TEST 7: Put increases as strike increases
 TEST_CASE("Put option value increases as strike increases", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
 
+    LSMConfig config = makeDefaultConfig();
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff35(35.0), payoff40(40.0), payoff45(45.0);
     auto basis = makeTestBasis();
@@ -246,14 +223,7 @@ TEST_CASE("Put option value increases as strike increases", "[lsm_pricer]") {
 
 //TEST 8: Put value increases as volatility increases
 TEST_CASE("Put option value increases as volatility increases", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
     GeometricBrownianMotion proc15(0.06, 0.15), proc25(0.06, 0.25), proc35(0.06, 0.35);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -274,14 +244,7 @@ TEST_CASE("Put option value increases as volatility increases", "[lsm_pricer]") 
 
 //TEST 9: we require: DEEP ITM > ATM > OTM  - related to spot monotonicity
 TEST_CASE("Put option value is highest deep in the money and lowest out of the money", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
     GeometricBrownianMotion process(0.06, 0.2);
     Put_payoff payoff(40.0);
     auto basis = makeTestBasis();
@@ -325,14 +288,7 @@ TEST_CASE("LSMPricer rejects invalid config in simulatePaths", "[lsm_pricer]") {
 
 //TEST 10: Imediate exercise lower bound: V^AM(S0) >= (K - S0)+
 TEST_CASE("American put value is at least immediate exercise value", "[lsm_pricer]") {
-    LSMConfig config;
-    config.numPaths = 5000;
-    config.useAntithetic = true;
-    config.numExerciseDates = 50;
-    config.maturity = 1.0;
-    config.riskFreeRate = 0.06;
-    config.rngSeed = 24;
-
+    LSMConfig config = makeDefaultConfig();
     const double S0 = 35.0;
     const double K = 40.0;
 
@@ -345,4 +301,55 @@ TEST_CASE("American put value is at least immediate exercise value", "[lsm_price
     double intrinsic = std::max(K - S0, 0.0);
 
     REQUIRE(price >= intrinsic);
+}
+
+//TEST CASE 11: test to check toy example. The price and path values are checked.
+TEST_CASE("LSM reproduces Longstaff-Schwartz 8-path toy example", "[lsm_pricer][toy_example]") {
+    LSMConfig config = makeDefaultConfig();
+    config.numExerciseDates = 3;
+    config.numPaths = 8;
+    config.useAntithetic = false;
+    config.maturity = 3.0;
+    config.riskFreeRate = 0.06;
+    Put_payoff payoff(1.10);
+
+    BasisSet basis;
+    basis.makeMonomialSet(2); // constant, x, x^2
+
+    GeometricBrownianMotion process(0.06, 0.2); 
+   // process is unused once the test paths are supplied directly
+    LSMPricer pricer(process, payoff, basis, config);
+
+    PathData data;
+    data.numPaths = 8;
+    data.numTimeSteps = 3;
+    data.paths = {
+        {1.00, 1.09, 1.08, 1.34},
+        {1.00, 1.16, 1.26, 1.54},
+        {1.00, 1.22, 1.07, 1.03},
+        {1.00, 0.93, 0.97, 0.92},
+        {1.00, 1.11, 1.56, 1.52},
+        {1.00, 0.76, 0.77, 0.90},
+        {1.00, 0.92, 0.84, 1.01},
+        {1.00, 0.88, 1.22, 1.34}
+    };
+    data.cashFlows = std::vector<std::vector<double>>(8, std::vector<double>(4, 0.0));
+
+    std::vector<double> pv = pricer.runBackwardInductionForTest(data);
+
+    double price = 0.0;
+    for (double x : pv) price += x;
+    price /= pv.size();
+    //the paper rounds this to 4 s.f. so we choose a margin of 1e-4
+    REQUIRE(price == Approx(0.1144).margin(1e-4));
+
+    // check final cashflow matrix implied by the paper
+    REQUIRE(data.cashFlows[0][1] == Approx(0.0));
+    REQUIRE(data.cashFlows[1][1] == Approx(0.0));
+    REQUIRE(data.cashFlows[2][3] == Approx(0.07).margin(1e-8));
+    REQUIRE(data.cashFlows[3][1] == Approx(0.17).margin(1e-8));
+    REQUIRE(data.cashFlows[4][1] == Approx(0.0));
+    REQUIRE(data.cashFlows[5][1] == Approx(0.34).margin(1e-8));
+    REQUIRE(data.cashFlows[6][1] == Approx(0.18).margin(1e-8));
+    REQUIRE(data.cashFlows[7][1] == Approx(0.22).margin(1e-8));
 }

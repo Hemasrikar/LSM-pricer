@@ -72,6 +72,10 @@ namespace lsm {
 
                 // Price the option and also return the generated path data.
                 std::pair<lsm::engine::SimulationResult, lsm::engine::PathData> priceWithData(double S0);
+
+                std::vector<double> runBackwardInductionForTest(PathData& data) const {
+                    return backwardInduction(data);
+                }
         private:
 
             const lsm::core::StochasticProcess& process;
