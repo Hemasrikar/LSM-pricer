@@ -20,6 +20,8 @@
 // Configuration
 
 namespace cfg {
+    constexpr int seed = 24;
+
     // Market parameters
     constexpr double initial_spot = 1.0;
     constexpr double risk_free_rate = 0.02;
@@ -193,7 +195,7 @@ int main() {
         cfg_lsm.numExerciseDates = cfg::num_exercise_dates;
         cfg_lsm.maturity = cfg::maturity;
         cfg_lsm.riskFreeRate = cfg::risk_free_rate;
-        cfg_lsm.rngSeed = 42;
+        cfg_lsm.rngSeed = cfg::seed;
 
         lsm::core::GeometricBrownianMotion gbm(cfg::risk_free_rate, cfg::volatility);
         lsm::core::Put_payoff put(cfg::strike);
@@ -211,12 +213,11 @@ int main() {
                   << "American:  " << result.optionValue << "\n"
                   << "European:  " << result.europeanValue << "\n"
                   << "Premium:   " << result.earlyExercisePremium << "\n"
-                  << "Std Err:   " << result.standardError << "\n\n";
+                  << "Std Err:   " << result.standardError << "\n";
 
-        std::cout << "Exporting:\n";
         export_csv(path_data, result, cfg::maturity, cfg::strike, cfg::risk_free_rate);
 
-        std::cout << "\n CSV Exported\n";
+        std::cout << "CSV Exported";
         return EXIT_SUCCESS;
 
     } catch (const std::exception& e) {
