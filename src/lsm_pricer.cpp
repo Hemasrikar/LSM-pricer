@@ -290,9 +290,24 @@ namespace lsm {
 
         double optionValue = sum/N; //monte carlo estimate of the option val
 
-        double variance = std::max(0.0, sumSq/N - optionValue * optionValue);
+        double variance, standardError;
 
-        double standardError = std::sqrt(variance / N); //standard error
+        if (config.useAntithetic) {
+            // SE is computed from the N/2 pairwise averages rather than treating all N paths as independent
+            const int half = N / 2;
+            double pairSum = 0.0, pairSumSq = 0.0;
+            for (int i = 0; i < half; ++i) {
+                double y = (pv[i] + pv[i + half]) / 2.0;
+                pairSum += y;
+                pairSumSq += y * y;
+            }
+            double pairMean = pairSum / half;
+            variance = std::max(0.0, pairSumSq / half - pairMean * pairMean);
+            standardError = std::sqrt(variance / half);
+        } else {
+            variance = std::max(0.0, sumSq / N - optionValue * optionValue);
+            standardError = std::sqrt(variance / N); //standard error
+        }
 
         //store everything in the result obj
         SimulationResult result;

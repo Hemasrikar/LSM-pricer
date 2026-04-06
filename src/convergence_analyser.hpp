@@ -42,6 +42,8 @@ namespace lsm{
 
             double getLSMPrice(unsigned seed, int numExerciseDates, int order, int numPaths);
 
+            lsm::engine::SimulationResult getLSMResult(unsigned seed, int numExerciseDates, int order, int numPaths, bool antithetic);
+
 
             // functions to run the convergence analysis
 

@@ -71,6 +71,23 @@ namespace lsm{
             return myPricer.price(S0).optionValue;
         }
 
+        lsm::engine::SimulationResult ConvergenceAnalyser::getLSMResult(unsigned seed, int numExerciseDates, int order, int numPaths, bool antithetic) {
+            lsm::engine::LSMConfig config;
+            config.rngSeed = seed;
+            config.numExerciseDates = numExerciseDates;
+            config.numPaths = numPaths;
+            config.riskFreeRate = r;
+            config.maturity = T;
+            config.useAntithetic = antithetic;
+
+            lsm::core::BasisSet basis;
+            basisFactory(basis, order);
+
+            auto process = sdeFactory(r, sigma);
+            lsm::engine::LSMPricer myPricer(*process, payoffType, basis, config);
+            return myPricer.price(S0);
+        }
+
     // Benchmark: compares BS European, FD American, LSM American across parameter combinations
     void ConvergenceAnalyser::runBenchmark() {
         const double origS0    = S0;
@@ -292,54 +309,68 @@ namespace lsm{
         std::vector<int> seeds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         std::string filename = "csv_output/seed_stability_" + paramString() + ".csv";
 
-        double fdPrice = getFDPrice();
-
         std::cout << "\n--- Seed Stability ---\n\n";
         std::cout << std::fixed << std::setprecision(4);
         std::cout << std::right
                   << std::setw(6)  << "Seed"
-                  << std::setw(13) << "LSM Price"
-                  << std::setw(11) << "Error"
-                  << std::setw(12) << "Time (ms)" << "\n"
-                  << std::string(42, '-') << "\n";
+                  << std::setw(13) << "Plain Price"
+                  << std::setw(11) << "Plain SE"
+                  << std::setw(17) << "Antithetic Price"
+                  << std::setw(15) << "Antithetic SE" << "\n"
+                  << std::string(62, '-') << "\n";
 
         std::ofstream out(filename);
-        out << "Seed,LSMPrice,FDPrice,Error,Time(ms)\n";
+        out << "Seed,PlainPrice,PlainSE,AntitheticPrice,AntitheticSE\n";
 
-        std::vector<double> prices;
+        std::vector<double> plainPrices;
+        std::vector<double> antitheticPrices;
+        double plainSESum = 0.0, antiSESum = 0.0;
 
         for (int seed : seeds) {
-            auto start      = std::chrono::high_resolution_clock::now();
-            double lsmPrice = getLSMPrice(seed, fixedNumDates, order, fixedPathCount);
-            auto end        = std::chrono::high_resolution_clock::now();
-            double ms       = std::chrono::duration<double, std::milli>(end - start).count();
+            lsm::engine::SimulationResult plain      = getLSMResult(seed, fixedNumDates, order, fixedPathCount, false);
+            lsm::engine::SimulationResult antithetic = getLSMResult(seed, fixedNumDates, order, fixedPathCount, true);
 
-            double error = std::abs(fdPrice - lsmPrice);
-            prices.push_back(lsmPrice);
-            out << seed << "," << lsmPrice << "," << fdPrice << "," << error << "," << ms << "\n";
+            plainPrices.push_back(plain.optionValue);
+            antitheticPrices.push_back(antithetic.optionValue);
+            plainSESum += plain.standardError;
+            antiSESum  += antithetic.standardError;
+
+            out << seed << ","
+                << plain.optionValue << "," << plain.standardError << ","
+                << antithetic.optionValue << "," << antithetic.standardError << "\n";
 
             std::cout << std::setw(6)  << seed
-                      << std::setw(13) << lsmPrice
-                      << std::setw(11) << error
-                      << std::setw(11) << std::setprecision(2) << ms << " ms"
-                      << std::setprecision(4) << "\n";
+                      << std::setw(13) << plain.optionValue
+                      << std::setw(11) << plain.standardError
+                      << std::setw(17) << antithetic.optionValue
+                      << std::setw(15) << antithetic.standardError << "\n";
         }
 
-        double mean = 0.0;
-        for (double p : prices) mean += p;
-        mean /= prices.size();
+        double plainMean = 0.0, antiMean = 0.0;
+        for (double p : plainPrices)      plainMean += p;
+        for (double p : antitheticPrices) antiMean  += p;
+        plainMean /= plainPrices.size();
+        antiMean  /= antitheticPrices.size();
 
-        double variance = 0.0;
-        for (double p : prices) variance += (p - mean) * (p - mean);
-        double stddev = std::sqrt(variance / prices.size());
+        double plainVar = 0.0, antiVar = 0.0;
+        for (double p : plainPrices)      plainVar += (p - plainMean) * (p - plainMean);
+        for (double p : antitheticPrices) antiVar  += (p - antiMean)  * (p - antiMean);
+        double plainStd   = std::sqrt(plainVar / plainPrices.size());
+        double antiStd    = std::sqrt(antiVar  / antitheticPrices.size());
+        double avgPlainSE = plainSESum / seeds.size();
+        double avgAntiSE  = antiSESum  / seeds.size();
 
-        out << "Mean,"   << mean   << ",,,\n";
-        out << "StdDev," << stddev << ",,,\n";
+        out << "Stats," << plainMean   << "," << plainStd   << "," << antiMean  << "," << antiStd  << "\n";
+        out << "AvgSE," << avgPlainSE  << ",," << avgAntiSE << ",\n";
         out.close();
 
-        std::cout << std::string(42, '-') << "\n"
-                  << std::setw(6)  << "Mean"   << std::setw(13) << mean   << "\n"
-                  << std::setw(6)  << "StdDev" << std::setw(13) << stddev << "\n"
+        std::cout << std::string(62, '-') << "\n"
+                  << std::setw(6) << "Stats"
+                  << std::setw(13) << plainMean  << std::setw(11) << plainStd
+                  << std::setw(17) << antiMean   << std::setw(15) << antiStd  << "\n"
+                  << std::setw(6) << "AvgSE"
+                  << std::setw(13) << avgPlainSE << std::setw(11) << ""
+                  << std::setw(17) << avgAntiSE  << "\n"
                   << "\n  -> Written to: " << filename << "\n";
     }
 

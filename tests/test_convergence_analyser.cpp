@@ -285,7 +285,7 @@ TEST_CASE("runSeedStability CSV has correct header", "[convergence]") {
     std::ifstream f(seedFile);
     std::string header;
     std::getline(f, header);
-    REQUIRE(header == "Seed,LSMPrice,FDPrice,Error,Time(ms)");
+    REQUIRE(header == "Seed,PlainPrice,PlainSE,AntitheticPrice,AntitheticSE");
 }
 
 // Correct number of rows (10 seeds + Mean + StdDev summary rows)
