@@ -1,4 +1,6 @@
 # LSM American Option Pricer
+![Status](https://img.shields.io/badge/status-complete-brightgreen)
+
 
 This project implements the **Longstaff-Schwartz Least Squares Monte Carlo (LSM)** algorithm for pricing American options in C++20.
 
