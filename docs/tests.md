@@ -140,3 +140,25 @@ g++ -std=c++17 -I. test_underlying_sde.cpp underlying_sde.cpp -o test_sde && ./t
 | `RNG` | 21 | Default constructor (unseeded) produces finite normal samples |
 
 ---
+
+## Finite Difference Pricer Testing
+
+Tests cover the implicit-scheme American option pricer in `lsm::fd`.
+
+#### Running the Tests
+```bash
+g++ -std=c++17 -I. test_finite_difference.cpp finite_difference.cpp option_payoff.cpp underlying_sde.cpp -o test_fd && ./test_fd
+```
+
+#### Test Cases and Summary
+
+| Test | Tested on |
+|---|---|
+| Trivial sanity | `0 == 0` and `1 + 1 == 2` |
+| Paper Table 1: T=1, σ=0.20 | American put prices at `S ∈ {36, 40, 44}` match Longstaff-Schwartz (2001) Table 1 to within 1% |
+| Paper Table 1: T=1, σ=0.40 | American put price at `S=36` matches paper value `7.101` to within 1% |
+| Paper Table 1: T=2, σ=0.20 | American put prices at `S ∈ {36, 40}` match paper values `4.840` and `2.885` to within 1% |
+
+- **Benchmark parameters** - implicit scheme, `K=40`, `r=0.06`, 40,000 time steps per year, 1,000 stock steps, matching the paper's stated setup
+
+---
