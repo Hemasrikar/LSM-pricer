@@ -45,6 +45,7 @@ It is therefore the final stage of the pricing pipeline.
 
 ---
 
+
 ## Inputs
 
 - `pv`: Vector of discounted pathwise present values returned by `backwardInduction(...)`.
@@ -56,6 +57,7 @@ It is therefore the final stage of the pricing pipeline.
 - `T`: Number of exercise dates / time steps.
 
 ---
+
 
 ## Computation
 
@@ -83,29 +85,31 @@ This is used to construct the variance estimate.
 
 ---
 
-### 3. Compute the variance estimate
+### 3. Compute the variance and standard error
 
-The variance of the pathwise estimator is computed as
+The calculation depends on whether antithetic variance reduction was used during simulation (`config.useAntithetic`).
 
-```math
-\max\left(0,\; \frac{1}{N}\sum_{i=1}^{N} pv_i^2 - \widehat{V}^2\right).
-```
-
-The `max(0.0, ...)` guard is included to prevent small negative values caused by floating-point roundoff.
-
-This does not change the underlying statistical idea; it simply ensures numerical robustness.
-
----
-
-### 4. Compute the standard error
-
-The Monte Carlo standard error is then computed as
+**Without antithetic sampling**, the variance is estimated from all $N$ independent paths:
 
 ```math
-\sqrt{\frac{\text{variance}}{N}}.
+\text{variance} = \max\left(0,\; \frac{1}{N}\sum_{i=1}^{N} pv_i^2 - \widehat{V}^2\right),
+\qquad
+\text{SE} = \sqrt{\frac{\text{variance}}{N}}.
 ```
 
-This measures the sampling uncertainty in the estimated option value.
+**With antithetic sampling**, paths are generated in $N/2$ paired groups where path $i$ and path $i + N/2$ use opposite Brownian shocks $z$ and $-z$. These paired paths are correlated, so treating all $N$ paths as independent would understate the standard error. Instead, the SE is computed from the $N/2$ pairwise averages:
+
+```math
+y_i = \frac{pv_i + pv_{i + N/2}}{2}, \quad i = 1, \dots, N/2
+```
+
+```math
+\text{variance} = \max\left(0,\; \frac{1}{N/2}\sum_{i=1}^{N/2} y_i^2 - \bar{y}^2\right),
+\qquad
+\text{SE} = \sqrt{\frac{\text{variance}}{N/2}}.
+```
+
+The `max(0.0, ...)` guard prevents small negative values caused by floating-point roundoff in both cases.
 
 ---
 

@@ -16,10 +16,11 @@ A small set of stochastic process classes for simulating one-dimensional asset-p
 All concrete classes inherit from `StochasticProcess` (defined in the header), which provides the common simulation interface:
 
 ```cpp
-virtual double step(double s, double dt, RNG& rng) const = 0;
+virtual double stepWithNormal(double s, double dt, double z, RNG& rng) const = 0;
+virtual double step(double s, double dt, RNG& rng) const;          // non-pure: calls stepWithNormal
 std::vector<double> simulatePath(double s0, double T, std::size_t n, RNG& rng) const;
 ```
-`step()` advances the process by one time step, while `simulatePath()` generates a full path on a uniform grid by repeated application of `step()`.
+`stepWithNormal()` is the only pure virtual method; `step()` has a default implementation that draws a normal variate internally and delegates to `stepWithNormal()` (template method pattern). `simulatePath()` generates a full path on a uniform grid by repeated application of `step()`.
 
 ---
 ## Random Number Generator

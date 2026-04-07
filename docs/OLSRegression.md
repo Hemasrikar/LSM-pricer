@@ -49,16 +49,27 @@ where $P$ is a permutation matrix. This reordering exposes any redundancy in the
 
 The solver lives in `Ols_regression()` in `src/ols_regression.cpp` (namespace `lsm::engine`). The pipeline works as follows:
 
-**1.** `buildDesignMatrix` evaluates each basis function on $S_t$ for ITM paths only, producing the design matrix $X$. OTM paths are excluded entirely since we only need continuation values where early exercise is actually a decision.
+**1.** `buildDesignMatrix` evaluates each basis function on the normalised spot price $S_t / K$ for ITM paths only, producing the design matrix $X$. The strike $K$ is passed explicitly so that inputs are dimensionless and comparable across different strikes. OTM paths are excluded entirely since we only need continuation values where early exercise is actually a decision.
 
 **2.** `buildYVector` discounts the next-period cashflows by $e^{-r\Delta t}$ for ITM paths, producing the target vector $Y$. These are the values we are trying to predict with the regression.
 
-**3.** `Ols_regression` solves $X\hat{\beta} = Y$ via `colPivHouseholderQr().solve(Y)`, returning the fitted coefficients $\hat{\beta}$, which are then used to compute the continuation value for every path.
+**3.** `Ols_regression` solves $X\hat{\beta} = Y$ via `colPivHouseholderQr().solve(Y)`, returning the fitted continuation values for every path. The function signature is:
+
+```cpp
+std::vector<double> Ols_regression(
+    const std::vector<std::vector<double>>& paths,
+    std::size_t t,
+    const std::vector<double>& cashflows,
+    const std::vector<bool>& itm,
+    double discount_factor,
+    const lsm::core::BasisSet& basis,
+    double strike);
+```
 
 **4.** OTM paths are assigned $\hat{C}_i = 0$ by default. Since those paths are already out of the money, immediate exercise is not optimal and no regression estimate is needed.
 
 ```cpp
-// src/ols_regression.cpp (line 94)
+// src/ols_regression.cpp
 Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);
 ```
 

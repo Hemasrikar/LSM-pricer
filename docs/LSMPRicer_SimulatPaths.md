@@ -28,7 +28,7 @@ This method does not itself implement the stochastic simulation scheme. Instead,
 
 The `LSMPricer` object already stores:
 
-- the stochastic process `*process`, which determines the asset dynamics,
+- the stochastic process `process`, which determines the asset dynamics,
 - and the configuration `config`, which determines the simulation settings.
 
 Rather than requiring these ingredients to be passed again whenever paths are needed, `simulatePaths(double S0)` uses the pricer’s stored state and delegates path generation to the engine-layer simulation routine.
@@ -62,7 +62,7 @@ These determine the probabilistic law of the simulated paths and the discretisat
 The method calls the standalone path-generation routine:
 
 ```cpp
-return lsm::engine::simulatePaths(S0, *process, config);
+return lsm::engine::simulatePaths(S0, process, config);
 ```
 
 This routine returns a `PathData` object containing the simulated asset-price matrix and the associated storage for cashflows.

@@ -33,17 +33,19 @@ Unlike the path-generation layer, which is responsible only for simulating traje
 ```cpp
 class LSMPricer {
 public:
-    LSMPricer(lsm::core::StochasticProcess* process,
-              lsm::core::OptionPayoff* payoff,
-              lsm::core::BasisSet* basis,
+    LSMPricer(const lsm::core::StochasticProcess& process,
+              const lsm::core::OptionPayoff& payoff,
+              const lsm::core::BasisSet& basis,
               const lsm::engine::LSMConfig& config);
 
     lsm::engine::SimulationResult price(double S0);
 
+    std::pair<lsm::engine::SimulationResult, lsm::engine::PathData> priceWithData(double S0);
+
 private:
-    lsm::core::StochasticProcess* process;
-    lsm::core::OptionPayoff* payoff;
-    lsm::core::BasisSet* basis;
+    const lsm::core::StochasticProcess& process;
+    const lsm::core::OptionPayoff& payoff;
+    const lsm::core::BasisSet& basis;
 
     lsm::engine::LSMConfig config;
 
@@ -79,9 +81,9 @@ Accordingly, the class encapsulates the **optimal stopping** part of the algorit
 ## Constructor
 
 ```cpp
-LSMPricer(lsm::core::StochasticProcess* process,
-          lsm::core::OptionPayoff* payoff,
-          lsm::core::BasisSet* basis,
+LSMPricer(const lsm::core::StochasticProcess& process,
+          const lsm::core::OptionPayoff& payoff,
+          const lsm::core::BasisSet& basis,
           const lsm::engine::LSMConfig& config);
 ```
 
@@ -92,13 +94,13 @@ Constructs an `LSMPricer` from:
 - a regression basis set,
 - and a simulation / pricing configuration.
 
-The constructor stores pointers to the supplied process, payoff, and basis objects, together with a copy of the configuration.
+The constructor stores references to the supplied process, payoff, and basis objects, together with a copy of the configuration.
 
 This design allows the pricer to reuse the same model components throughout the full valuation pipeline without repeatedly passing them between internal routines.
 
 ---
 
-## Public Method
+## Public Methods
 
 ```cpp
 lsm::engine::SimulationResult price(double S0);
@@ -122,6 +124,14 @@ The return value is a `SimulationResult` object containing:
 - and the run metadata.
 
 See: [LSMPricer: Price](./LSMPricer_Price.md)
+
+---
+
+```cpp
+std::pair<lsm::engine::SimulationResult, lsm::engine::PathData> priceWithData(double S0);
+```
+
+Runs the same pricing pipeline as `price(double S0)` and returns both the `SimulationResult` and the full `PathData` object. This allows the simulated paths and pathwise cashflows to be inspected after pricing, which is useful for validation and convergence diagnostics.
 
 ---
 
