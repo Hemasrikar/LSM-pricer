@@ -5,100 +5,101 @@ nav_order: 7
 has_toc: true
 ---
 
+## Unit Testing
+
+Unit tests are written using the [Catch2](https://github.com/catchorg/Catch2) framework and cover all major components of the LSM pricer.
+
+---
 
 ## Basis Functions Testing
 
-Unit tests are written using the [Catch2](https://github.com/catchorg/Catch2) framework and cover all classes in `lsm::core`.
+Tests cover all classes in `lsm::core` related to basis function construction and evaluation.
 
 #### Running the Tests
 ```bash
-g++ -std=c++17 -I. test_basis_functions.cpp -o tests && ./tests
+g++ -std=c++17 -I. test_basis_functions.cpp basis_functions.cpp -o test_basis && ./test_basis
 ```
 
 #### Test Cases and Summary
 
-| Class | Tested on|
+| Class | Tested on |
 |---|---|
 | `ConstantBasis` | Returns `1.0` for all inputs and `name()` format check |
 | `MonomialBasis` | Powers 0 to 5, negative/zero inputs, and error throw on negative power |
-| `LaguerrePolynomial` | Output check for Orders 0, 1, 3, 4 and three term recurrence consistency up to order 8. Then negative input clamping and catching errors on negative order |
-| `BasisSet` | `makeLaguerreSet` and `makeMonomialSet` structure and values. Clear and rebuild check and catching errors on `numTerms < 1` |
+| `LaguerrePolynomial` | Output check for orders 0, 1, 3, 4 and three-term recurrence consistency up to order 8. Negative input clamping and error throw on negative order |
+| `BasisSet` | `makeLaguerreSet` and `makeMonomialSet` structure and values. Clear and rebuild check and error throw on `numTerms < 1` |
 | Polymorphism | Virtual dispatch through `BasisFunction*` for all three concrete types |
 
-- **Recurrence consistency** - verifies the three-term relation
-  `(n+1) * L_{n+1}(x) = (2n+1-x) * L_n(x) - n * L_{n-1}(x)` holds across orders 2–8
-- **Negative input clamping** - confirms `LaguerrePolynomial::evaluate(-x) == evaluate(0)` for all tested orders
-- **Clear and rebuild** - ensures calling a factory method twice does not accumulate elements
-- **Virtual dispatch** - exercises the `BasisFunction` interface directly via `std::unique_ptr<BasisFunction>`
-
-
-## Option Payoff Testing
-This section describes the tests written for the `Put_payoff` and `Call_payoff` classes and to verify that:
-- The payoff formulas are implemented correctly.
-- The `InTheMoney()` logic correctly identifies whether an option is ITM (in-the-money).
+- **Recurrence consistency** — verifies the three-term relation `(n+1) * L_{n+1}(x) = (2n+1-x) * L_n(x) - n * L_{n-1}(x)` holds across orders 2–8
+- **Negative input clamping** — confirms `LaguerrePolynomial::evaluate(-x) == evaluate(0)` for all tested orders
+- **Clear and rebuild** — ensures calling a factory method twice does not accumulate elements
+- **Virtual dispatch** — exercises the `BasisFunction` interface directly via `std::unique_ptr<BasisFunction>`
 
 ---
 
-Here we have included the test cases for both the put payoff and call payoff. As well as checking if the put option and call option is in-the-money (ITM). We have chosen the strike price `K = 100` and along with different set of values for the underlying asset price `S`.
+## Black-Scholes Pricer Testing
 
-### Payoff Tests
-```cpp
-TEST_CASE("Put_payoff returns correct payoff values", "[Put_payoff]") 
-{
-    Put_payoff put(100.0);
+Tests cover the analytical European option pricer in `bs_pricer`.
 
-    REQUIRE(put.payoff(50.0) == Approx(50.0));
-    REQUIRE(put.payoff(100.0) == Approx(0.0));
-    REQUIRE(put.payoff(150.0) == Approx(0.0));
-}
-
-TEST_CASE("Call_payoff returns correct payoff values", "[Call_payoff]") 
-{
-    Call_payoff call(100.0);
-
-    REQUIRE(call.payoff(50.0) == Approx(0.0));
-    REQUIRE(call.payoff(100.0) == Approx(0.0));
-    REQUIRE(call.payoff(150.0) == Approx(50.0));
-}
+#### Running the Tests
+```bash
+g++ -std=c++17 -I. test_bs_pricer.cpp bs_pricer.cpp -o test_bs && ./test_bs
 ```
-This test checks whether the put payoff and call payoff functions correctly follows their payoff formula:
 
-- Put Payoff = max(K − S,0) 
-- Call Payoff = max(S - K,0)
+#### Test Cases and Summary
 
-Where:
-- K = strike price
-- S = underlying asset price
+| Test | Tested on |
+|---|---|
+| Known result | Call and put prices match reference values for ATM option (S=K=100, T=1, r=0.05, σ=0.2) to 4 d.p. |
+| Put-call parity | `C - P = S - K * exp(-rT)` holds to within 0.01 |
+| Non-negativity | Prices are ≥ 0 across a 3×3 grid of spot and strike combinations |
+| Volatility monotonicity | Both call and put prices increase strictly with σ at three volatility levels |
+| Spot monotonicity | Call price increases and put price decreases as spot rises |
+| Near-expiry intrinsic | Price converges to intrinsic value as `T → 0` for deep ITM call, deep OTM call, and deep ITM put |
+| Lower bound | Call price satisfies `C ≥ max(S - K * exp(-rT), 0)` for all tested spot values |
 
-### In-The-Money Tests
-```cpp
-TEST_CASE("Put_payoff InTheMoney works correctly", "[Put_payoff]") 
-{
-    Put_payoff put(100.0);
+---
 
-    REQUIRE(put.InTheMoney(50.0) == true);
-    REQUIRE(put.InTheMoney(99.9) == true);
-    REQUIRE(put.InTheMoney(100.0) == false);
-    REQUIRE(put.InTheMoney(150.0) == false);
-}
+## OLS Regression Testing
 
-TEST_CASE("Call_payoff InTheMoney works correctly", "[Call_payoff]") 
-{
-    Call_payoff call(100.0);
+Tests cover the regression utilities in `lsm::engine` used to estimate continuation values.
 
-    REQUIRE(call.InTheMoney(50.0) == false);
-    REQUIRE(call.InTheMoney(100.0) == false);
-    REQUIRE(call.InTheMoney(100.1) == true);
-    REQUIRE(call.InTheMoney(150.0) == true);
-}
+#### Running the Tests
+```bash
+g++ -std=c++17 -I. -I/usr/include/eigen3 test_OLS_regression.cpp basis_functions.cpp ols_regression.cpp mc_paths.cpp option_payoff.cpp underlying_sde.cpp -o test_ols && ./test_ols
 ```
-This test validates the logic for determining if a put option and call option is in-the-money (ITM).
 
-ITM Condition:
-- Put option: S < K
-- Call option: S > K
+#### Test Cases and Summary
 
+| Function | Tested on |
+|---|---|
+| `buildDesignMatrix` (Monomial) | Matrix shape: 3 ITM rows × 4 columns for 5-path input with Monomial basis |
+| `buildDesignMatrix` (Laguerre) | Matrix shape: 3 ITM rows × 4 columns for 5-path input with Laguerre basis |
+| `generatePaths` | Output dimensions `[N][n+1]` and initial value `S0` on all paths |
+| `Ols_regression` | Reproduction of the Longstaff-Schwartz (2001) paper Table 2 continuation values at `t=2` |
 
-Where:
-- K = strike price
-- S = underlying asset price
+- **Paper reproduction** — uses the 8-path toy example from Longstaff & Schwartz (2001), pp. 116–117. The test verifies that OTM paths receive continuation value 0.0, and that ITM paths match the published values (e.g. path 4: `0.1176`, path 6: `0.1520`) to within 1%
+- **Design matrix shape** — confirms only ITM rows are included and the number of columns equals the basis size
+
+---
+
+## Option Payoff Testing
+
+Tests cover `Put_payoff` and `Call_payoff` in `lsm::core`.
+
+#### Running the Tests
+```bash
+g++ -std=c++17 -I. test_option_payoff.cpp option_payoff.cpp -o test_payoff && ./test_payoff
+```
+
+#### Test Cases and Summary
+
+| Class | Tested on |
+|---|---|
+| `Put_payoff` | Payoff values: ITM (`S < K`), ATM (`S = K`), OTM (`S > K`) |
+| `Put_payoff` | `InTheMoney`: returns `true` strictly below strike, `false` at and above |
+| `Call_payoff` | Payoff values: OTM (`S < K`), ATM (`S = K`), ITM (`S > K`) |
+| `Call_payoff` | `InTheMoney`: returns `false` at and below strike, `true` strictly above |
+| `OptionPayoff` interface | Virtual destructor exercised via `std::unique_ptr<OptionPayoff>` for both derived types; `strike()` accessor checked |
+
+---
