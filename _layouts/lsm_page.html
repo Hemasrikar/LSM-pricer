@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: 'en-US' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/just-the-docs.css' | relative_url }}">
+  {% if site.favicon_ico %}
+    <link rel="icon" href="{{ site.favicon_ico | relative_url }}">
+  {% endif %}
+  {% seo %}
+  {% include head_custom.html %}
+</head>
+<body>
+  <main style="max-width: 100%; width: 100%; margin: 0; padding: 0;">
+    {{ content }}
+  </main>
+</body>
+</html>
