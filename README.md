@@ -1,7 +1,9 @@
 # LSM American Option Pricer
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 
+The Final report can be found [here](report.pdf)
 
+---
 This project implements the **Longstaff-Schwartz Least Squares Monte Carlo (LSM)** algorithm for pricing American options in C++20.
 
 The core idea is to use regression on Monte Carlo simulated paths to estimate the continuation value at each exercise date, working backwards from maturity. This gives a provably convergent lower bound on the true option price.
