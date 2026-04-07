@@ -103,3 +103,40 @@ g++ -std=c++17 -I. test_option_payoff.cpp option_payoff.cpp -o test_payoff && ./
 | `OptionPayoff` interface | Virtual destructor exercised via `std::unique_ptr<OptionPayoff>` for both derived types; `strike()` accessor checked |
 
 ---
+## Underlying SDE Testing
+
+Tests cover `GeometricBrownianMotion`, `JumpDiffusionProcess`, and `RNG` in `lsm::core`.
+
+#### Running the Tests
+```bash
+g++ -std=c++17 -I. test_underlying_sde.cpp underlying_sde.cpp -o test_sde && ./test_sde
+```
+
+#### Test Cases and Summary
+
+| Class | Test # | Tested on |
+|---|---|---|
+| `GeometricBrownianMotion` | 1 | Constructor throws `std::invalid_argument` for `sigma < 0` |
+| `GeometricBrownianMotion` | 2 | `stepWithNormal` throws for `dt ≤ 0` |
+| `GeometricBrownianMotion` | 3 | `stepWithNormal` matches exact formula `S * exp((r - σ²/2)dt + σ√dt · z)` |
+| `GeometricBrownianMotion` | 4 | Deterministic evolution (`σ = 0`) reduces to `S * exp(r·dt)` regardless of `z` |
+| `GeometricBrownianMotion` | 5 | `simulatePath` returns vector of size `n+1` with `path[0] == S0` |
+| `GeometricBrownianMotion` | 6 | `simulatePath` throws for `T ≤ 0` |
+| `GeometricBrownianMotion` | 17 | `simulatePath` is fully deterministic when `σ = 0`, each step matching `S0 * exp(r·dt·i)` |
+| `GeometricBrownianMotion` | 19 | Getters `r()` and `sigma()` return values passed to constructor |
+| `JumpDiffusionProcess` | 7 | Constructor throws for `sigma < 0` |
+| `JumpDiffusionProcess` | 8 | Constructor throws for `lambda < 0` |
+| `JumpDiffusionProcess` | 9 | `step` throws for negative state `s < 0` |
+| `JumpDiffusionProcess` | 10 | `step` returns `0.0` when state is zero (absorbing state) |
+| `JumpDiffusionProcess` | 11 | `step` throws for `dt ≤ 0` |
+| `JumpDiffusionProcess` | 12 | `stepWithNormal` returns `0.0` for `s ≤ 0` |
+| `JumpDiffusionProcess` | 13 | `stepWithNormal` throws for `dt ≤ 0` |
+| `JumpDiffusionProcess` | 14 | `stepWithNormal` with `lambda = 0` matches GBM exact formula |
+| `JumpDiffusionProcess` | 15 | Jump almost surely occurs at `lambda = 1000`, `stepWithNormal` returns `0.0` |
+| `JumpDiffusionProcess` | 16 | Fully deterministic when `sigma = 0` and `lambda = 0` |
+| `JumpDiffusionProcess` | 18 | Getters `r()`, `sigma()`, `lambda()` return values passed to constructor |
+| `JumpDiffusionProcess` | 20 | `step` returns positive value for valid inputs with no jumps (`lambda = 0`) |
+| `JumpDiffusionProcess` | 22 | `step` returns `0.0` when jump probability is effectively 1 (`lambda = 1000`) |
+| `RNG` | 21 | Default constructor (unseeded) produces finite normal samples |
+
+---
