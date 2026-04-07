@@ -20,3 +20,4 @@ has_toc: true
 | [Convergence Analyser](/docs/ConvergenAnalyzer.md) | `convergence_analyser.hpp/.cpp` | Benchmarking and convergence studies |
  
 ---
+[UML Diagram for the project](/docs/uml_diagram.md)
