@@ -163,7 +163,6 @@ g++ -std=c++17 -I. test_finite_difference.cpp finite_difference.cpp option_payof
 
 ---
 
-
 ## LSM Pricer Testing
 
 Tests cover the full Longstaff-Schwartz Monte Carlo pricer in `lsm::engine`.
