@@ -77,6 +77,6 @@ Eigen::VectorXd beta = X.colPivHouseholderQr().solve(Y);
 
 ## References
 
-- Longstaff & Schwartz (2001) — *Valuing American Options by Simulation: A Simple Least-Squares Approach*, §1–2
+- Longstaff & Schwartz (2001) — *Valuing American Options by Simulation: A Simple Least-Squares Approach*, section: 1–2
 - [Eigen: Least Squares](https://libeigen.gitlab.io/eigen/docs-3.3/group__LeastSquares.html)
 - [Eigen: Quick Reference](https://libeigen.gitlab.io/eigen/docs-nightly/group__QuickRefPage.html)
