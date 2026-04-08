@@ -10,7 +10,7 @@ The core idea is to use regression on Monte Carlo simulated paths to estimate th
 
 > Longstaff, F.A. & Schwartz, E.S. (2001). *Valuing American Options by Simulation: A Simple Least-Squares Approach.* Review of Financial Studies, 14(1), 113–147.
 
-### Configuration: LSMConfig
+### Configuration:
 
 The `LSMConfig` struct controls all parameters for the Longstaff-Schwartz pricer. The lsm_pricer.hpp provides defaults and values can be changed through main.cpp.
 
@@ -65,10 +65,4 @@ Three layers:
 To run the unit tests, open VSCode and use either the **CMake** tab or the **Testing** tab in the left sidebar.
 
 ---
-
-> Why we chose Unicorn as a team name: Unicorn was a memorable mascot for our team project, while also being quick and easy to type in command terminals. The term is also used in the tech industry to denote fast-growing startups valued at over US$1 billion, a testament to the naive ambition and enthusiasm with which we began the project.
-
-
-<div align="center">
-  <img src="extern/unicorn cutout.png" alt="Unicorn Mascot" width="300">
-</div>
+This is a term project submitted for partial fulfillment of a module, IB9JH: Programming for Quantitative Finance.
