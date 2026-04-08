@@ -1,4 +1,4 @@
-build/
+cpp/build/
 build_coverage/
 coverage_report/
 output/
