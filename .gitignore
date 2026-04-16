@@ -13,3 +13,5 @@ tests/IO/*
 /analysis/*.png
 !/analysis/*.py
 plots/
+build/
+.vscode
